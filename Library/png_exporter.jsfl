@@ -4,7 +4,8 @@
  * @email pedro@oopstoons.com
  * @see http://abitofcode.com/2011/11/export-flash-library-items-as-pngs-with-jsfl/
  *
- * May have to load in: fl.configURI + 'Javascript/ObjectFindAndSelect.jsfl'
+ * May have to load in: fl.configURI + 'Javascript/ObjectFindAndSelect.jsfl'.
+ * Uses reported size (width/height) to position items for cropping so unreported size (filters, stroke width) may get clipped.
  */
 function PNGExporter(doc, savePath) {
 	this.constructer(doc, savePath);
@@ -15,9 +16,16 @@ PNGExporter.prototype = {
 	//-----------------------------------------------------------------------------------------------------------------------------
 	// PROPERTIES
 	
+	/** The origin document. */
 	originDoc:"",
+	
+	/** The origin document folder. */
 	originPath:"",
+	
+	/** The save PNG path. */
 	savePath:"",
+	
+	/** The export document. */
 	exportdoc:"",
 	
 	/** Callback on element preparation. */
@@ -32,7 +40,7 @@ PNGExporter.prototype = {
 	constructer:function(doc, savePath) {
 		fl.trace("PNGExporter: "+doc);
 		this.originDoc = doc;
-		this.originPath = this.originDoc.pathURI.replace(/[^.\/]+.fla/, "");
+		this.originPath = this.originDoc.pathURI.replace(/[^.\/]+\.fla/, "");
 		this.savePath = savePath ? savePath : this.originPath;
 	},
 
@@ -117,14 +125,11 @@ PNGExporter.prototype = {
 		// this doc is the export doc
 		this.exportdoc = fl.getDocumentDOM();
 		
-		// keep a reference to the original path
-		var docPath = this.originDoc.pathURI;
-		
 		// save a copy of the doc and save the image
 		this.saveStage(fileName);
 		
 		// open the original doc
-		fl.openDocument(docPath)
+		fl.openDocument(this.originDoc.pathURI)
 	},
 
 	//-----------------------------------------------------------------------------------------------------------------------------
@@ -191,6 +196,21 @@ PNGExporter.prototype = {
 		this.exportdoc.width = Math.ceil(selectedElement.width);
 		this.exportdoc.height = Math.ceil(selectedElement.height);
 		this.exportdoc.moveSelectionBy({x:-selectedElement.left, y:-selectedElement.top});
+		
+		// BUG Uses reported size (width/height) to position items for cropping so unreported size (filters, stroke width) may get clipped.
+		/*
+    left => -143.55
+    top => -212.55
+    width => 81
+    height => 81
+    x => -143.55
+    y => -212.55
+    objectSpaceBounds ...
+        left => -9.299
+        top => -9.299
+        right => 133.05
+        bottom => 90.3
+		*/
 		
 		// get item data
 		var data = {};
