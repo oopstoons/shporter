@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<macromedia-extension name="Export to Spriter" version="1.0.3" type="command">
+<macromedia-extension name="Export to Spriter" version="0.0.4" type="command">
 	<author name="Pedro Chavez" />
 	<products>
 		<product name="Flash" version="11" primary="true" required="true" />
@@ -14,5 +14,6 @@
 		<file source="Library/spriter_exporter.jsfl" destination="$flash/Spriter" />
 		<file source="Library/debug.jsfl" destination="$flash/Spriter" />
 		<file source="Library/math.jsfl" destination="$flash/Spriter" />
+		<file source="Library/trig.jsfl" destination="$flash/Spriter" />
 	</files>
 </macromedia-extension>

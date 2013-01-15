@@ -29,6 +29,7 @@
 fl.runScript(fl.configURI + "Spriter/png_exporter.jsfl");
 fl.runScript(fl.configURI + "Spriter/debug.jsfl");
 fl.runScript(fl.configURI + "Spriter/math.jsfl");
+fl.runScript(fl.configURI + "Spriter/trig.jsfl");
 
 function SpriterExporter() {
 	this.constructer();
@@ -104,9 +105,9 @@ SpriterExporter.prototype = {
 		var filePath = this.docPath + this.docName + ".scml";
 		FLfile.write(filePath, out);
 		
-		fl.trace("var xxx:Array = [" + debugObj.x.join(",") + "];");
-		fl.trace("var yyy:Array = [" + debugObj.y.join(",") + "];");
-		fl.trace("var rrr:Array = [" + debugObj.r.join(",") + "];");
+		fl.trace("var xxx:Array = [" + debugObj.x.join(", ") + "];");
+		fl.trace("var yyy:Array = [" + debugObj.y.join(", ") + "];");
+		fl.trace("var rrr:Array = [" + debugObj.r.join(", ") + "];");
 	},
 	
 	debugObj:{},
@@ -184,22 +185,25 @@ SpriterExporter.prototype = {
 		var data = {};
 		data.element = element;
 		data.frame = frameNum;
-		data.name = element.symbolType == "graphic" ? this.fixName(element.libraryItem.name) + this.padLeft(element.firstFrame, 4, "0") : this.fixName(element.libraryItem.name);
+		// TODO read multiframe movieclips and graphics with loop/playonce blendmodes
+		// BUG only reads graphic frames from keyframes and movieclip frame 0
+		data.elementFrame = element.symbolType == "graphic" ? element.firstFrame : 0;
+		data.name = this.fixName(element.libraryItem.name) + this.padLeft(data.elementFrame, 4, "0");
 		
 		// position
 		data.x = element.x;
 		data.y = element.y;
 		data.depth = element.depth;
-		data.transformX = Math2.round(element.transformX, .001);
-		data.transformY = Math2.round(element.transformY, .001);
+		data.transformX = element.transformX;
+		data.transformY = element.transformY;
 		
 		// rotation and scaling
 		data.rotation = element.rotation;
 		data.matrix = element.matrix;
 		data.skewX = element.skewX;
 		data.skewY = element.skewY;
-		data.scaleX = this.getScaleX(element, data);
-		data.scaleY = Math2.round(element.scaleY, .001);
+		data.scaleX = element.scaleX;
+		data.scaleY = element.scaleY;
 		
 		// color
 		data.colorRedAmount = element.colorRedAmount;
@@ -211,20 +215,8 @@ SpriterExporter.prototype = {
 		data.colorAlphaAmount = element.colorAlphaAmount;
 		data.colorAlphaPercent = element.colorAlphaPercent;
 		
-		fl.trace("- " + data.frame + "." + data.name + ": position=" + data.x + ":" + data.y + " scale=" + data.scaleX + ":" + data.scaleY + " angle=" + data.angle + " elementNum="+depth);
-			
-		//Debug.dump(element, "readElement");
-		
-		
 		// save image
-		var imageName = "";
-		if (element.symbolType == "movie clip"){
-			imageName = this.saveImage(element.libraryItem, false, 0);
-
-		} else if (element.symbolType == "graphic"){
-			imageName = this.saveImage(element.libraryItem, true, element.firstFrame);
-		}
-		data.imageName =imageName;
+		this.saveImage(element.libraryItem, data.elementFrame, data.name);
 		
 		return data;
 	},
@@ -332,6 +324,8 @@ SpriterExporter.prototype = {
 		
 		var imageData = this.imgData[elementData.name];
 		
+		this.getPosition(elementData, imageData);
+		
 		var node = '<object folder="0" file="' + this.getImgId(elementData.name) + '"';
 		node += this.saveAttribute(elementData, imageData, "x", this.getX, 0);
 		node += this.saveAttribute(elementData, imageData, "y", this.getY, 0);
@@ -347,8 +341,8 @@ SpriterExporter.prototype = {
 		//node += ' z_index="' + elementData.depth + '"';
 		node += '/>';
 		
-		debugObj.x.push('{x:' + elementData.x + ", t:" + elementData.transformX + ", r:" + imageData.regX + ", w:" + imageData.width + "}");
-		debugObj.y.push('{y:' + elementData.y + ", t:" + elementData.transformY + ", r:" + imageData.regY + ", h:" + imageData.height + "}");
+		debugObj.x.push('{x:' + elementData.x + ",t:" + elementData.transformX + ",r:" + imageData.regX + ",w:" + imageData.width + ",p:" + elementData.localPivot.x + ",rG:" + elementData.globalTopLeft.x + "}");
+		debugObj.y.push('{y:' + elementData.y + ",t:" + elementData.transformY + ",r:" + imageData.regY + ",h:" + imageData.height + ",p:" + elementData.localPivot.y + ",rG:" + elementData.globalTopLeft.y + "}");
 		debugObj.r.push('{r:' + elementData.rotation + "}");
 		
 		return '				<key id="' + frameCount + '" spin="0">\r					' + node + '\r				</key>\r';
@@ -362,9 +356,7 @@ SpriterExporter.prototype = {
 	/**
 	 * Save an image and it's data.
 	 */
-	saveImage: function(item, isGraphic, itemFrame){
-		var imageName = isGraphic ? this.fixName(item.name) + this.padLeft(itemFrame, 4, "0") : this.fixName(item.name);
-		
+	saveImage: function(item, itemFrame, imageName){
 		// save if saved already
 		if (!this.isNewImage(imageName)){
 			return;
@@ -400,25 +392,44 @@ SpriterExporter.prototype = {
 	// GETTERS
 	
 	// TODO global scaling: position, scaling, pivot?
+	getPosition: function(elementData, imageData){
+		// globalize topleft
+		var globalTopLeft = TrigUtil.rotatePoint(0, 0, imageData.regX, imageData.regY, elementData.rotation);
+		globalTopLeft.x = elementData.x - globalTopLeft.x;
+		globalTopLeft.y = elementData.y - globalTopLeft.y;
+		elementData.globalTopLeft = globalTopLeft;
+		
+		var transformX = elementData.transformX;
+		var transformY = elementData.transformY;
+		//var position = TrigUtil.rotatePoint(globalTopLeft.x, globalTopLeft.y, transformX, transformY, elementData.rotation);
+		//elementData.position = position;
+		
+		// localize the pivot point
+		var localPivot = TrigUtil.rotatePoint(globalTopLeft.x, globalTopLeft.y, transformX, transformY, -elementData.rotation);
+		localPivot.x -= globalTopLeft.x;
+		localPivot.y -= globalTopLeft.y;
+		localPivot.x = Math2.round(localPivot.x - imageData.regX)//, .001);
+		localPivot.y = Math2.round(localPivot.y - imageData.regY)//, .001);
+		elementData.localPivot = localPivot;
+	},
 
 	getX: function(elementData, imageData){
 		var value = elementData.transformX;
-		return Math2.round(value, .001);
+		return Math2.round(value)//, .001);
 	},
 	
 	getY: function(elementData, imageData){
-		var value =  -elementData.transformY;
-		return Math2.round(value, .001);
+		var value = -elementData.transformY;
+		return Math2.round(value)//, .001);
 	},
 
 	getPivotX: function(elementData, imageData){
-		var value = (elementData.x - elementData.transformX - imageData.regX + imageData.width) / imageData.width;
-		value = -value + 1;
+		var value = (imageData.regX + elementData.localPivot.x) / imageData.width;
 		return Math2.round(value, .001);
 	},
 	
 	getPivotY: function(elementData, imageData){
-		var value = (elementData.y - elementData.transformY - imageData.regY + imageData.height) / imageData.height;
+		var value = (imageData.height - imageData.regY - elementData.localPivot.y) / imageData.height;
 		return Math2.round(value, .001);
 	},
 

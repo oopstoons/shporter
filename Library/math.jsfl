@@ -6,6 +6,7 @@
 var Math2 = {
 
 	round:function($value, $increment) {
+		$increment = $increment ? $increment : 1;
 		if ($increment <= 0){
 			return $value;
 		}
@@ -13,6 +14,7 @@ var Math2 = {
 	},
 
 	ceil:function($value, $increment) {
+		$increment = $increment ? $increment : 1;
 		if ($increment <= 0){
 			return $value;
 		}
@@ -24,6 +26,7 @@ var Math2 = {
 	},
 
 	floor:function($value, $increment) {
+		$increment = $increment ? $increment : 1;
 		if ($increment <= 0){
 			return $value;
 		}
