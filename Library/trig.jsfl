@@ -59,50 +59,23 @@ var TrigUtil = {
 
 	/**
 	 * Rotate a point around another point.
-	 * @param	$baseX		The x point to rotate around.
-	 * @param	$baseY		The y point to rotate around.
-	 * @param	$sourceX	The x point to rotate.
-	 * @param	$sourceY	The y point to rotate.
+	 * @param	$originX	The x point to rotate around.
+	 * @param	$originY	The y point to rotate around.
+	 * @param	$pointX		The x point to rotate.
+	 * @param	$pointY		The y point to rotate.
 	 * @param	$rotation	The angle to rotate.
 	 * @return
-	 * @see http://blog.geomusings.com/2007/06/25/rotating-a-point-around-a-base-point/
+	 * @see http://stackoverflow.com/questions/2259476/rotating-a-point-about-another-point-2d
 	 */
-	rotatePoint:function($baseX, $baseY, $sourceX, $sourceY, $rotation) {
-		// shift x and y relative to 0,0 origin
-		var offsetX = $sourceX + ($baseX * -1);
-		var offsetY = $sourceY + ($baseY * -1);
-
-		// convert to radians. take absolute value (necessary for x coord only).
-		offsetX = Math.abs(offsetX * TrigUtil.DEG_TO_RAD);
-		offsetY = offsetY * TrigUtil.DEG_TO_RAD;
-		var rotationRadians = $rotation * TrigUtil.DEG_TO_RAD;
-
-		// get distance from origin to source point
-		var distance = Math.sqrt(Math.pow(offsetX, 2) + Math.pow(offsetY, 2));
-
-		// get current angle of orientation
-		var theta = Math.atan(offsetY / offsetX);
-
-		// add rotation value to theta to get new angle of orientation
-		var offsetTheta = theta + rotationRadians;
-
-		// calculate new coord
-		var rotateX = distance * Math.cos(offsetTheta);
-		var rotateY = distance * Math.sin(offsetTheta);
-
-		// convert new x and y back to decimal degrees
-		rotateX = rotateX * TrigUtil.RAD_TO_DEG;
-		rotateY = rotateY * TrigUtil.RAD_TO_DEG;
-
-		// shift new x and y relative to base point
-		rotateX = (rotateX + $baseX);
-		rotateY = (rotateY + $baseY);
-
-		// check valid data
-		if (isNaN(rotateX) || isNaN(rotateY)){
-			return {x:$sourceX, y:$sourceY};
-		} else {
-			return {x:rotateX, y:rotateY};
-		}
+	rotatePoint:function($originX, $originY, $pointX, $pointY, $rotation) {
+		var angleRad = $rotation * TrigUtil.DEG_TO_RAD;
+		var angleSin = Math.sin(angleRad);
+		var angleCos = Math.cos(angleRad);
+		
+		var displaceX = $pointX - $originX;
+		var displaceY = $pointY - $originY;
+		var rotateX = displaceX * angleCos + displaceY * angleSin;
+		var rotateY = displaceY * angleCos - displaceX * angleSin;
+		return {x:rotateX + $originX, y:rotateY + $originY};
 	}
 }
