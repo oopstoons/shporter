@@ -30,6 +30,7 @@ fl.runScript(fl.configURI + "Spriter/png_exporter.jsfl");
 fl.runScript(fl.configURI + "Spriter/debug.jsfl");
 fl.runScript(fl.configURI + "Spriter/math.jsfl");
 fl.runScript(fl.configURI + "Spriter/trig.jsfl");
+fl.runScript(fl.configURI + "Spriter/logger.jsfl");
 
 function SpriterExporter() {
 	this.constructer();
@@ -55,6 +56,9 @@ SpriterExporter.prototype = {
 	imgNames:"",
 	exportImages:true,
 	pngExporter:"",
+	
+	/** Logger. */
+	//logger:null,
 
 	//-----------------------------------------------------------------------------------------------------------------------------
 	// CONSTRUCTER METHOD
@@ -70,7 +74,10 @@ SpriterExporter.prototype = {
 		this.imgData = {};
 		this.aniNames = [];
 		this.imgNames = [];
+		
+		//this.logger = new Logger();
 		this.pngExporter = new PNGExporter(fl.getDocumentDOM(), null);
+		//this.pngExporter.logger = this.logger;
 		
 		Debug.dumpMaxLevels = 2;
 	},
@@ -370,7 +377,7 @@ SpriterExporter.prototype = {
 		// export image
 		var itemData;
 		if (this.exportImages) {
-			itemData = this.pngExporter.exportLibraryItem(item.name, imageName, itemFrame);
+			itemData = this.pngExporter.exportItem(item, imageName, itemFrame);
 		} else {
 			itemData = {registrationX:0, registrationY:0, width:0, height:0};
 		}

@@ -23,7 +23,7 @@ var Debug = {
 	dump:function(obj, name) {
 		var out = this._dump(obj);
 		out = out.search(/[\r\n]/g) >= 0 ? "{\r" + out + "\r}" : out;
-		out = name ? name + ": " + out : out;		
+		out = name ? name + ": " + out : out;
 		if (this.traceDump){
 			fl.trace(out);
 		}
@@ -59,6 +59,7 @@ var Debug = {
 					}
 				}
 				
+				// log different types of objects
 				if (error){
 					output = padding + item + " => <Unable to Read>\n";
 					

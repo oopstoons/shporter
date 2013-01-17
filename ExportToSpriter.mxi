@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<macromedia-extension name="Export to Spriter" version="0.0.4" type="command">
+<macromedia-extension name="Export to Spriter" version="0.0.5" type="command">
 	<author name="Pedro Chavez" />
 	<products>
 		<product name="Flash" version="11" primary="true" required="true" />
@@ -8,12 +8,15 @@
 	<ui-access><![CDATA[The command can be found in 'Commands > Spriter']]></ui-access>
 	<license-agreement><![CDATA[]]></license-agreement>
 	<files>
-		<file source="Commands/Export Timeline.jsfl" destination="$flash/Commands/Spriter" />
+		<file source="Commands/Spriter - all main elements.jsfl" destination="$flash/Commands/Spriter" />
+		<file source="Commands/PNG - timeline selection.jsfl" destination="$flash/Commands/Spriter" />
+		<file source="Commands/PNG - library selection.jsfl" destination="$flash/Commands/Spriter" />
 		<file source="Commands/Test.jsfl" destination="$flash/Commands/Spriter" />
 		<file source="Library/png_exporter.jsfl" destination="$flash/Spriter" />
 		<file source="Library/spriter_exporter.jsfl" destination="$flash/Spriter" />
 		<file source="Library/debug.jsfl" destination="$flash/Spriter" />
 		<file source="Library/math.jsfl" destination="$flash/Spriter" />
 		<file source="Library/trig.jsfl" destination="$flash/Spriter" />
+		<file source="Library/logger.jsfl" destination="$flash/Spriter" />
 	</files>
 </macromedia-extension>

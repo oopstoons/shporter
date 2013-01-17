@@ -5,10 +5,11 @@
  * @see http://abitofcode.com/2011/11/export-flash-library-items-as-pngs-with-jsfl/
  *
  * May have to load in: fl.configURI + 'Javascript/ObjectFindAndSelect.jsfl'.
- * Uses reported size (width/height) to position items for cropping so unreported size (filters, stroke width) may get clipped.
  */
-function PNGExporter(doc, savePath) {
-	this.constructer(doc, savePath);
+fl.runScript(fl.configURI + "Spriter/logger.jsfl");
+
+function PNGExporter(doc, outputPath) {
+	this.constructer(doc, outputPath);
 }
 
 PNGExporter.prototype = {
@@ -16,69 +17,118 @@ PNGExporter.prototype = {
 	//-----------------------------------------------------------------------------------------------------------------------------
 	// PROPERTIES
 	
-	/** The origin document. */
-	originDoc:"",
+	/** The input document. */
+	inputDoc:"",
 	
-	/** The origin document folder. */
-	originPath:"",
+	/** The input document path. */
+	inputPath:"",
+	
+	/** The input document file name. */
+	inputName:"",
+	
+	/** The output document. */
+	outputDoc:"",
 	
 	/** The save PNG path. */
-	savePath:"",
-	
-	/** The export document. */
-	exportdoc:"",
+	outputPath:"",
 	
 	/** Callback on element preparation. */
 	onElementPrep:null,
 	
 	/** Callback on temp doc preparation. */
 	onStagePrep:null,
+	
+	/** Logger. */
+	//logger:null,
 
 	//-----------------------------------------------------------------------------------------------------------------------------
 	// CONSTRUCTER METHOD
 	
-	constructer:function(doc, savePath) {
-		fl.trace("PNGExporter: "+doc);
-		this.originDoc = doc;
-		this.originPath = this.originDoc.pathURI.replace(/[^.\/]+\.fla/, "");
-		this.savePath = savePath ? savePath : this.originPath;
+	constructer:function(doc, outputPath) {
+		this.inputDoc = doc ? doc : fl.getDocumentDOM();
+		this.inputPath = this.inputDoc.pathURI.replace(/[^.\/]+\.fla/, "");
+		this.inputName = this.inputDoc.pathURI.replace(/.+?([^.\/]+)\.fla/, "$1");
+		this.outputPath = outputPath ? outputPath : this.inputPath;
+		
+		//Logger = new Logger();
+		Logger.log('PNGExporter: outputPath=' + this.outputPath);
 	},
 
 	//-----------------------------------------------------------------------------------------------------------------------------
 	// EXPORT METHODS
 	
 	/**
-	 * Export a library item as a png.
+	 * Export a library item by name as a png.
 	 */
-	exportLibraryItem: function(libraryName, fileName, frameNum) {
+	exportItemByName: function(itemName, fileName, frameNum) {
+		frameNum = frameNum ? frameNum : 0;
+		Logger.log('PNGExporter.exportItemByName: itemName="' + itemName + '" fileName=' + fileName + ' frameNum=' + frameNum);
+		
 		// checks if item exists in library
-		var exists = this.originDoc.library.selectItem(libraryName, true);
+		var exists = this.inputDoc.library.selectItem(itemName, true);
 		if (!exists) {
-			alert('Item named "' + libraryName + '" not found in the library!');
+			var error = 'PNGExporter: Item named "' + itemName + '" not found in the library!';
+			alert(error);
+			Logger.error(error);
 			return null;
 		}
 		
 		// create temp scene to add item to, cut the item and kill the temp scene
-		this.originDoc.addNewScene("__temp__");
-		var selectedItems = this.originDoc.library.getSelectedItems();
-		var success = this.originDoc.library.addItemToDocument({x:0, y:0}, libraryName);
-		this.originDoc.clipCut();
-		this.originDoc.deleteScene();
+		this.inputDoc.exitEditMode();
+		this.inputDoc.addNewScene("__DELETE_ME__");
+		this.inputDoc.library.addItemToDocument({x:0, y:0}, itemName);
+		this.inputDoc.clipCut();
+		this.inputDoc.deleteScene();
 
-		// create new export doc
+		// create new output doc
 		fl.createDocument();
-		this.exportdoc = fl.getDocumentDOM();
+		this.outputDoc = fl.getDocumentDOM();
 
 		// pastes the clipboard item and choose frame
-		this.exportdoc.clipPaste();
-		var selectedElement = this.exportdoc.selection[0];
-		selectedElement.symbolType = 'graphic';
-		selectedElement.firstFrame = frameNum ? frameNum : 0;
+		this.outputDoc.clipPaste();
+		var element = this.outputDoc.selection[0];
+		element.symbolType = 'graphic';
+		element.firstFrame = frameNum;
 		
 		// prep the element
-		var data = this.prepElement(selectedElement);
+		var data = this.prepElement(element);
 
-		// export png
+		// save png
+		this.saveStage(fileName);
+		
+		// return item data
+		return data;
+	},
+	
+	/**
+	 * Export a library item as a png.
+	 */
+	exportItem: function(item, fileName, frameNum) {
+		frameNum = frameNum ? frameNum : 0;
+		Logger.log('PNGExporter.exportItem: item="' + item.name + '":' + item.itemType + ' fileName=' + fileName + ' frameNum=' + frameNum);
+		
+		// create temp scene to add item to, cut the item and kill the temp scene
+		this.inputDoc.library.selectItem(item.name, true);
+		this.inputDoc.exitEditMode();
+		this.inputDoc.addNewScene("__DELETE_ME__");
+		this.inputDoc.library.addItemToDocument({x:0, y:0}, item.name);
+		this.inputDoc.clipCut();
+		this.inputDoc.deleteScene();
+
+		// create new output doc
+		fl.createDocument();
+		this.outputDoc = fl.getDocumentDOM();
+
+		// pastes the clipboard item and choose frame
+		this.outputDoc.clipPaste();
+		var element = this.outputDoc.selection[0];
+		element.symbolType = 'graphic';
+		element.firstFrame = frameNum;
+		
+		// prep the element
+		var data = this.prepElement(element);
+
+		// save png
 		this.saveStage(fileName);
 		
 		// return item data
@@ -86,32 +136,37 @@ PNGExporter.prototype = {
 	},
 
 	/**
-	 * Export an element item as a png.
+	 * Export a timeline element by name as a png. Note, this digs from the main timeline (not the current timeline) until it finds an element with a matching name.
 	 */
 	exportElementByName: function(elementName, fileName) {
+		Logger.log('PNGExporter.outputElementByName: elementName="' + elementName + '" fileName=' + fileName);
+		
 		// find object
-		this.originDoc.selectNone();
-		var results = flash.findObjectInDocByName(elementName, this.originDoc);
+		this.inputDoc.exitEditMode();
+		this.inputDoc.selectNone();
+		var results = flash.findObjectInDocByName(elementName, this.inputDoc);
 		if (results.length > 0)	{
 			fl.selectElement(results[0], false);
-			this.originDoc.clipCopy();
+			this.inputDoc.clipCopy();
 		} else {
-			alert('Element named "' + elementName + '" not found on main timeline!');
+			var error = 'PNGExporter: Element named "' + elementName + '" not found on timeline!';
+			alert(error);
+			Logger.error(error);
 			return null;
 		}
 
-		// create new export doc
+		// create new output doc
 		fl.createDocument();
-		this.exportdoc = fl.getDocumentDOM();
+		this.outputDoc = fl.getDocumentDOM();
 
 		// pastes the clipboard item
-		this.exportdoc.clipPaste();
-		var selectedElement = this.exportdoc.selection[0];
+		this.outputDoc.clipPaste();
+		var element = this.outputDoc.selection[0];
 		
 		// prep the element
-		var data = this.prepElement(selectedElement);
+		var data = this.prepElement(element);
 
-		// export png
+		// save png
 		this.saveStage(fileName);
 		
 		// return item data
@@ -119,27 +174,29 @@ PNGExporter.prototype = {
 	},
 
 	/**
-	 * Export an element item as a png.
+	 * Export a timeline element as a png.
 	 */
 	exportElement: function(element, fileName) {
-		//this.originDoc.mouseClick({x:322.1, y:161.7}, false, true);
-		this.originDoc.selectNone();
-		fl.selectElement(element, false);
-		//element.selected = true;
-		this.originDoc.clipCopy();
+		var type = element.elementType == 'instance' ? element.libraryItem.name : element.elementType;
+		Logger.log('PNGExporter.outputElement: element="' + element.name + '":' + type + ' fileName=' + fileName);
 		
-		// create new export doc
+		// select the element and copy it
+		this.inputDoc.selectNone();
+		this.inputDoc.selection = [element];
+		this.inputDoc.clipCopy();
+		
+		// create new output doc
 		fl.createDocument();
-		this.exportdoc = fl.getDocumentDOM();
+		this.outputDoc = fl.getDocumentDOM();
 
 		// pastes the clipboard item
-		this.exportdoc.clipPaste();
-		var selectedElement = this.exportdoc.selection[0];
+		this.outputDoc.clipPaste();
+		var selectedElement = this.outputDoc.selection[0];
 		
 		// prep the element
 		var data = this.prepElement(selectedElement);
 
-		// export png
+		// save png
 		this.saveStage(fileName);
 		
 		// return item data
@@ -150,14 +207,16 @@ PNGExporter.prototype = {
 	 * Export the stage as a png.
 	 */
 	exportStage: function(fileName) {
-		// this doc is the export doc
-		this.exportdoc = fl.getDocumentDOM();
+		Logger.log('PNGExporter.outputStage: doc=' +  this.inputDoc.pathURI);
+		
+		// this doc is the output doc
+		this.outputDoc = this.inputDoc;
 		
 		// save a copy of the doc and save the image
 		this.saveStage(fileName);
 		
-		// open the original doc
-		fl.openDocument(this.originDoc.pathURI)
+		// open the inputal doc
+		fl.openDocument(this.inputPath + this.inputName + ".fla")
 	},
 
 	//-----------------------------------------------------------------------------------------------------------------------------
@@ -168,12 +227,12 @@ PNGExporter.prototype = {
 	 */
 	saveStage: function(fileName) {
 		// save doc temporarily
-		var exportPath = this.savePath + "/__DELETE_ME__.fla";
-		fl.saveDocument(fl.getDocumentDOM(), exportPath);
+		var outputDocPath = this.outputPath + "/__DELETE_ME__.fla";
+		fl.saveDocument(fl.getDocumentDOM(), outputDocPath);
 		
-		// export the profile and read it in
+		// output the profile and read it in
 		var profilePath = fl.configURI + 'Publish%20Profiles/__DELETE_ME__.xml';
-		this.exportdoc.exportPublishProfile(profilePath);
+		this.outputDoc.exportPublishProfile(profilePath);
 		xml = FLfile.read(profilePath);
 			
 		// node replacement
@@ -189,22 +248,22 @@ PNGExporter.prototype = {
 		
 		// write the modified profile and import it
 		FLfile.write(profilePath, xml);
-		this.exportdoc.importPublishProfile(profilePath);
+		this.outputDoc.importPublishProfile(profilePath);
 		
-		// pre export callback
+		// pre output callback
 		if (this.onStagePrep){
-			this.onStagePrep(this.exportdoc);
+			this.onStagePrep(this.outputDoc);
 		}
 
 		// publish the doc
-		fl.trace("PNGExporter.export: " + this.savePath + "/" + fileName + ".png");
-		this.exportdoc.publish();
+		Logger.log('PNGExporter.output: ' + this.outputPath + "/" + fileName + ".png");
+		this.outputDoc.publish();
 
-		// delete the publish profile xml and export doc
+		// delete the publish profile xml and output doc
 		FLfile.remove(profilePath);
-		this.exportdoc.close(false);
-		FLfile.remove(exportPath);
-		// BUG temp export doc will not delete if called from exportStage
+		this.outputDoc.close(false);
+		FLfile.remove(outputDocPath);
+		// BUG temp output doc will not delete if called from exportStage
 	},
 
 	//-----------------------------------------------------------------------------------------------------------------------------
@@ -213,43 +272,39 @@ PNGExporter.prototype = {
 	/**
 	 * Export an element item as a png.
 	 */
-	prepElement: function(selectedElement) {
-		// pre export callback
+	prepElement: function(element) {
+		// pre output callback
 		if (this.onElementPrep){
-			this.onElementPrep(selectedElement);
+			this.onElementPrep(element);
 		}
 		
-		// calculate size
-		var width = Math.ceil(selectedElement.objectSpaceBounds.right - selectedElement.objectSpaceBounds.left);
-		var height = Math.ceil(selectedElement.objectSpaceBounds.bottom - selectedElement.objectSpaceBounds.top);
+		// calculate position and size based on item bounds: good for library items
+		// BUG does NOT take into consideration scaling, skewing or rotation
+		//var width = Math.ceil(element.objectSpaceBounds.right - element.objectSpaceBounds.left);
+		//var height = Math.ceil(element.objectSpaceBounds.bottom - element.objectSpaceBounds.top);
+		//var x = Math.floor(-element.objectSpaceBounds.left);
+		//var y = Math.floor(-element.objectSpaceBounds.top);
+		
+		// calculate position and size based on element bounds: good for elements
+		// BUG filters, stroke width may get clipped
+		var width = Math.ceil(element.width);
+		var height = Math.ceil(element.height);
+		var x = Math.floor(element.x - element.left);
+		var y = Math.floor(element.y - element.top);
 
 		// crop stage to item bounds
-		this.exportdoc.selectAll();
-		this.exportdoc.width = width;
-		this.exportdoc.height = height;
-		this.exportdoc.moveSelectionBy({x:-selectedElement.objectSpaceBounds.left, y:-selectedElement.objectSpaceBounds.top});
-		
-		// BUG Uses reported size (width/height) to position items for cropping so unreported size (filters, stroke width) may get clipped.
-		/*
-    left => -143.55
-    top => -212.55
-    width => 81
-    height => 81
-    x => -143.55
-    y => -212.55
-    objectSpaceBounds ...
-        left => -9.299
-        top => -9.299
-        right => 133.05
-        bottom => 90.3
-		*/
+		this.outputDoc.selectAll();
+		this.outputDoc.width = width;
+		this.outputDoc.height = height;
+		element.x = x;
+		element.y = y;
 		
 		// get item data
 		var data = {};
 		data.width = width;
 		data.height = height;
-		data.registrationX = selectedElement.x;
-		data.registrationY = selectedElement.y;
+		data.registrationX = x;
+		data.registrationY = y;
 		
 		// return item data
 		return data;
