@@ -474,7 +474,7 @@ SpriterExporter.prototype = {
 	
 	getAlpha: function(elementData, imageData){
 		var value = elementData.colorAlphaPercent / 100 + elementData.colorAlphaAmount / 256;
-		return Math2.round(value * .5, .001);
+		return Math2.round(value, .001);
 	},
 	
 	getTime: function(totalFrames){

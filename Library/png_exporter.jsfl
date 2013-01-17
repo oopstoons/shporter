@@ -88,18 +88,46 @@ PNGExporter.prototype = {
 	/**
 	 * Export an element item as a png.
 	 */
-	exportElement: function(elementName, fileName) {
+	exportElementByName: function(elementName, fileName) {
 		// find object
 		this.originDoc.selectNone();
 		var results = flash.findObjectInDocByName(elementName, this.originDoc);
 		if (results.length > 0)	{
 			fl.selectElement(results[0], false);
-			fl.getDocumentDOM().clipCopy();
+			this.originDoc.clipCopy();
 		} else {
 			alert('Element named "' + elementName + '" not found on main timeline!');
 			return null;
 		}
 
+		// create new export doc
+		fl.createDocument();
+		this.exportdoc = fl.getDocumentDOM();
+
+		// pastes the clipboard item
+		this.exportdoc.clipPaste();
+		var selectedElement = this.exportdoc.selection[0];
+		
+		// prep the element
+		var data = this.prepElement(selectedElement);
+
+		// export png
+		this.saveStage(fileName);
+		
+		// return item data
+		return data;
+	},
+
+	/**
+	 * Export an element item as a png.
+	 */
+	exportElement: function(element, fileName) {
+		//this.originDoc.mouseClick({x:322.1, y:161.7}, false, true);
+		this.originDoc.selectNone();
+		fl.selectElement(element, false);
+		//element.selected = true;
+		this.originDoc.clipCopy();
+		
 		// create new export doc
 		fl.createDocument();
 		this.exportdoc = fl.getDocumentDOM();
@@ -190,12 +218,16 @@ PNGExporter.prototype = {
 		if (this.onElementPrep){
 			this.onElementPrep(selectedElement);
 		}
+		
+		// calculate size
+		var width = Math.ceil(selectedElement.objectSpaceBounds.right - selectedElement.objectSpaceBounds.left);
+		var height = Math.ceil(selectedElement.objectSpaceBounds.bottom - selectedElement.objectSpaceBounds.top);
 
 		// crop stage to item bounds
 		this.exportdoc.selectAll();
-		this.exportdoc.width = Math.ceil(selectedElement.width);
-		this.exportdoc.height = Math.ceil(selectedElement.height);
-		this.exportdoc.moveSelectionBy({x:-selectedElement.left, y:-selectedElement.top});
+		this.exportdoc.width = width;
+		this.exportdoc.height = height;
+		this.exportdoc.moveSelectionBy({x:-selectedElement.objectSpaceBounds.left, y:-selectedElement.objectSpaceBounds.top});
 		
 		// BUG Uses reported size (width/height) to position items for cropping so unreported size (filters, stroke width) may get clipped.
 		/*
@@ -214,8 +246,8 @@ PNGExporter.prototype = {
 		
 		// get item data
 		var data = {};
-		data.width = selectedElement.width;
-		data.height = selectedElement.height;
+		data.width = width;
+		data.height = height;
 		data.registrationX = selectedElement.x;
 		data.registrationY = selectedElement.y;
 		
