@@ -101,6 +101,7 @@ SpriterExporter.prototype = {
 			var element = selection[i];
 		Logger.log("element: " + i + " " +element);
 			if (this.isValidAniLayer(element.layer) && this.isValidAni(element)){
+				this.prepLayers(element);
 				this.readAniSymbol(element);
 			}
 		}
@@ -112,9 +113,9 @@ SpriterExporter.prototype = {
 		var filePath = this.docPath + this.docName + ".scml";
 		FLfile.write(filePath, out);
 		
-		Logger.log("var xxx:Array = [" + debugObj.x.join(", ") + "];");
-		Logger.log("var yyy:Array = [" + debugObj.y.join(", ") + "];");
-		Logger.log("var rrr:Array = [" + debugObj.r.join(", ") + "];");
+		//Logger.log("var xxx:Array = [" + debugObj.x.join(", ") + "];");
+		//Logger.log("var yyy:Array = [" + debugObj.y.join(", ") + "];");
+		//Logger.log("var rrr:Array = [" + debugObj.r.join(", ") + "];");
 	},
 	
 	debugObj:{},
@@ -149,12 +150,12 @@ SpriterExporter.prototype = {
 		Logger.log('=== READ ANI SYMBOL  name=' + data.name + '  scale=' + data.scaleX + ',' + data.scaleY + '  time=' + data.time + '  symbol="' + data.item.name + '"');
 		
 		// read all layers in the timeline
-		for(var layerNum = 0; layerNum < data.item.timeline.layerCount; layerNum++){
+		for(var layerNum = 0; layerNum < data.item.timeline.layerCount; layerNum++) {
 			var layer = data.item.timeline.layers[layerNum];
+			
 			if (this.isValidAniLayer(layer)){
 				layer.locked = false;
 				var frameData = [];
-				data.layerData.push(frameData);
 				Logger.log("--- READLAYER " + layer.name);
 				
 				// read all frames in the layer
@@ -175,6 +176,12 @@ SpriterExporter.prototype = {
 							}
 						}
 					}
+				}
+				
+				// add to layer data only if data exists
+				Logger.log("--- LAYER " + frameData);
+				if (frameData.length) {
+					data.layerData.unshift(frameData);
 				}
 			}
 		}
@@ -235,6 +242,9 @@ SpriterExporter.prototype = {
 	 * Save the animation data.
 	 */
 	saveData: function(){
+		Logger.log('=========================================================================================');
+		Logger.log('=== SAVE DATA');
+		
 		var out = '<?xml version="1.0" encoding="UTF-8"?>\r';
 		out += '<spriter_data scml_version="1.0" generator="BrashMonkey Spriter" generator_version="a4.1">\r';
 		
@@ -260,6 +270,7 @@ SpriterExporter.prototype = {
 			var timelineOut = "";
 			for(var l = 0; l < ani.layerData.length; l++){
 				var layer = ani.layerData[l];
+				Logger.log(">> Layer: " + l + " " + layer);
 				if (layer.length) {
 					timelineOut += '			<timeline id="' + l + '">\r';
 					for(var f = 0; f < layer.length; f++){
@@ -280,19 +291,19 @@ SpriterExporter.prototype = {
 				
 				for(var l = 0; l < ani.layerData.length; l++){
 					var layer = ani.layerData[l];
-						for(var f = 0; f < layer.length; f++){
-							var frame = layer[f];
-							if (frame.frame == t){
-								
-								if (!foundKeyFrame){
-									foundKeyFrame = true;
-									mainlineOut += '				<key id="' + keyframeCount + '" time="' + this.getTime(t) + '">\r';
-								}
+					for(var f = 0; f < layer.length; f++){
+						var frame = layer[f];
+						if (frame.frame == t){
 							
-								mainlineOut += this.saveMainlineKey(frame, keyframeCount, itemCount);
-								itemCount++;
+							if (!foundKeyFrame){
+								foundKeyFrame = true;
+								mainlineOut += '				<key id="' + keyframeCount + '" time="' + this.getTime(t) + '">\r';
 							}
+						
+							mainlineOut += this.saveMainlineKey(frame, keyframeCount, itemCount);
+							itemCount++;
 						}
+					}
 				}
 				
 				if (foundKeyFrame){
@@ -544,9 +555,19 @@ SpriterExporter.prototype = {
 		}
 	},
 
-	/* Recursively unlock exportable layers and lock unexportable layers. */
-	unlockLayers: function(){
-		// TODO parse layers and lock/unlock
+	/* Unlock exportable layers and lock unexportable layers. */
+	prepLayers: function(element){
+		var total = element.libraryItem.timeline.layers.length;
+		for (var i = 0; i < total; i++) {
+			var layer = element.libraryItem.timeline.layers[i];
+			if (this.isValidAniLayer(layer)){
+				layer.locked = false;
+				layer.visible = true;
+			} else {
+				layer.locked = true;
+				layer.visible = false;
+			}
+		}
 	},
 
 	//-----------------------------------------------------------------------------------------------------------------------------
