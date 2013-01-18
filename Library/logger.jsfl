@@ -86,8 +86,10 @@ var Logger = {
 	/**
 	 * Traces the log into the output panel.
 	 */
-	trace:function() {
-		fl.outputPanel.clear();
+	trace:function($clear) {
+		if ($clear != false) {
+			fl.outputPanel.clear();
+		}
 		fl.trace(this.data);
 	},
 	

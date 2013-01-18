@@ -24,7 +24,7 @@ var TrigUtil = {
 	 * @param $x2 The second x value
 	 * @param $y2 The second y value
 	 * @return The angle from the first set of cordinates to the second
-	 * @example Math2.getAngle(0, 0, 50, 50)   // 45
+	 * @example TrigUtil.getAngle(0, 0, 50, 50)   // 45
 	 */
 	getAngle:function($x1, $y1, $x2, $y2) {
 		var radians = TrigUtil.getRadian($x1, $y1, $x2, $y2);
@@ -38,7 +38,7 @@ var TrigUtil = {
 	 * @param $x2 The second x value
 	 * @param $y2 The second y value
 	 * @return The radian from the first set of cordinates to the second
-	 * @example Math2.getRadian(0, 0, 50, 50)   // 0.7853981633974483
+	 * @example TrigUtil.getRadian(0, 0, 50, 50)   // 0.7853981633974483
 	 */
 	getRadian:function($x1, $y1, $x2, $y2) {
 		return Math.atan2(($y2 - $y1), ($x2 - $x1));
@@ -51,7 +51,7 @@ var TrigUtil = {
 	 * @param $x2 The second x value, default 0
 	 * @param $y2 The second y value, default 0
 	 * @return The distance from the first set of cordinates to the second. Always returns positive.
-	 * @example Math2.getDistance(0, 0, 3, 4)    // 5
+	 * @example TrigUtil.getDistance(0, 0, 3, 4)    // 5
 	 */
 	getDistance:function($x1, $y1, $x2, $y2) {
 		return Math.sqrt(($y2 - $y1) * ($y2 - $y1) + ($x2 - $x1) * ($x2 - $x1));

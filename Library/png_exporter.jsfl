@@ -37,9 +37,6 @@ PNGExporter.prototype = {
 	
 	/** Callback on temp doc preparation. */
 	onStagePrep:null,
-	
-	/** Logger. */
-	//logger:null,
 
 	//-----------------------------------------------------------------------------------------------------------------------------
 	// CONSTRUCTER METHOD
@@ -49,9 +46,6 @@ PNGExporter.prototype = {
 		this.inputPath = this.inputDoc.pathURI.replace(/[^.\/]+\.fla/, "");
 		this.inputName = this.inputDoc.pathURI.replace(/.+?([^.\/]+)\.fla/, "$1");
 		this.outputPath = outputPath ? outputPath : this.inputPath;
-		
-		//Logger = new Logger();
-		Logger.log('PNGExporter: outputPath=' + this.outputPath);
 	},
 
 	//-----------------------------------------------------------------------------------------------------------------------------

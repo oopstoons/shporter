@@ -64,7 +64,7 @@ SpriterExporter.prototype = {
 	// CONSTRUCTER METHOD
 	
 	constructer:function() {
-		fl.trace("SpriterExporter: ");
+		Logger.log("SpriterExporter: ");
 		
 		// create data holders
 		this.doc = fl.getDocumentDOM();
@@ -93,13 +93,13 @@ SpriterExporter.prototype = {
 		this.doc.selectAll();
 		var selection = this.doc.selection;
 		
-		fl.trace("selection: " + selection.length);
+		Logger.log("selection: " + selection.length);
 		//Debug.dump(selection, "selection");
 		
 		// iterate through all slected items and export valid items
 		for(var i = 0; i < selection.length; i++){
 			var element = selection[i];
-		fl.trace("element: " + i + " " +element);
+		Logger.log("element: " + i + " " +element);
 			if (this.isValidAniLayer(element.layer) && this.isValidAni(element)){
 				this.readAniSymbol(element);
 			}
@@ -112,9 +112,9 @@ SpriterExporter.prototype = {
 		var filePath = this.docPath + this.docName + ".scml";
 		FLfile.write(filePath, out);
 		
-		fl.trace("var xxx:Array = [" + debugObj.x.join(", ") + "];");
-		fl.trace("var yyy:Array = [" + debugObj.y.join(", ") + "];");
-		fl.trace("var rrr:Array = [" + debugObj.r.join(", ") + "];");
+		Logger.log("var xxx:Array = [" + debugObj.x.join(", ") + "];");
+		Logger.log("var yyy:Array = [" + debugObj.y.join(", ") + "];");
+		Logger.log("var rrr:Array = [" + debugObj.r.join(", ") + "];");
 	},
 	
 	debugObj:{},
@@ -145,8 +145,8 @@ SpriterExporter.prototype = {
 		}
 		
 		// trace
-		fl.trace('=========================================================================================');
-		fl.trace('=== READ ANI SYMBOL  name=' + data.name + '  scale=' + data.scaleX + ',' + data.scaleY + '  time=' + data.time + '  symbol="' + data.item.name + '"');
+		Logger.log('=========================================================================================');
+		Logger.log('=== READ ANI SYMBOL  name=' + data.name + '  scale=' + data.scaleX + ',' + data.scaleY + '  time=' + data.time + '  symbol="' + data.item.name + '"');
 		
 		// read all layers in the timeline
 		for(var layerNum = 0; layerNum < data.item.timeline.layerCount; layerNum++){
@@ -155,14 +155,14 @@ SpriterExporter.prototype = {
 				layer.locked = false;
 				var frameData = [];
 				data.layerData.push(frameData);
-				fl.trace("--- READLAYER " + layer.name);
+				Logger.log("--- READLAYER " + layer.name);
 				
 				// read all frames in the layer
 				for(var frameNum = 0; frameNum < layer.frameCount; frameNum++){
 					var frame = layer.frames[frameNum];
 					if (this.isValidAniFrame(frame, frameNum)){
 						this.ungroupFrameElements(frame, frameNum, data.item);
-						fl.trace("-- frame:" + frameNum+ ", " + frame.tweenType + ", " + frame.elements);
+						Logger.log("-- frame:" + frameNum+ ", " + frame.tweenType + ", " + frame.elements);
 						
 						// read all elements in the frame
 						for(var elementNum = 0; elementNum < frame.elements.length; elementNum++){
@@ -310,8 +310,8 @@ SpriterExporter.prototype = {
 		out += '	</entity>\r';
 		out += '</spriter_data>';
 
-		fl.trace("\r\r\r");
-		fl.trace(out);
+		Logger.log("\r\r\r");
+		Logger.log(out);
 		
 		return out;
 	},
@@ -394,7 +394,7 @@ SpriterExporter.prototype = {
 		imageData.height = itemData.height;
 		
 		// save image data
-		fl.trace("--- SAVEIMAGE " + imageName);
+		Logger.log("--- SAVEIMAGE " + imageName);
 		this.imgData[imageName] = imageData;
 		this.imgNames.push(imageName);
 		return imageName;
@@ -420,68 +420,68 @@ SpriterExporter.prototype = {
 
 	getX: function(elementData, imageData){
 		var value = elementData.transformX;
-		return Math2.round(value, .001);
+		return MathUtil.round(value, .001);
 	},
 	
 	getY: function(elementData, imageData){
 		var value = -elementData.transformY;
-		return Math2.round(value, .001);
+		return MathUtil.round(value, .001);
 	},
 
 	getPivotX: function(elementData, imageData){
-		var value = Math2.getPercent(0, imageData.width, elementData.localPivot.x, false);
-		return Math2.round(value, .001);
+		var value = MathUtil.getPercent(0, imageData.width, elementData.localPivot.x, false);
+		return MathUtil.round(value, .001);
 	},
 	
 	getPivotY: function(elementData, imageData){
-		var value = Math2.getPercent(imageData.height, 0, elementData.localPivot.y, false);
-		return Math2.round(value, .001);
+		var value = MathUtil.getPercent(imageData.height, 0, elementData.localPivot.y, false);
+		return MathUtil.round(value, .001);
 	},
 
 	getScaleX: function(elementData, imageData){
 		// TODO remove skewing, spriter does not support
-		//fl.trace(data.frame +" "+ data.name+" sX="+ round(element.scaleX, .001)+" sY="+ round(element.scaleY, .001)+" a="+round(element.matrix.a, .001)+" d="+round(element.matrix.d, .001) + " angle=" + data.angle);
-		//fl.trace("x scale: " + Math.sqrt(element.matrix.a * element.matrix.a + element.matrix.b * element.matrix.b));
-		//fl.trace("y scale: " + Math.sqrt(element.matrix.c * element.matrix.c + element.matrix.d * element.matrix.d));
-		//fl.trace(" ");
-		return Math2.round(elementData.scaleX, .001);
+		//Logger.log(data.frame +" "+ data.name+" sX="+ round(element.scaleX, .001)+" sY="+ round(element.scaleY, .001)+" a="+round(element.matrix.a, .001)+" d="+round(element.matrix.d, .001) + " angle=" + data.angle);
+		//Logger.log("x scale: " + Math.sqrt(element.matrix.a * element.matrix.a + element.matrix.b * element.matrix.b));
+		//Logger.log("y scale: " + Math.sqrt(element.matrix.c * element.matrix.c + element.matrix.d * element.matrix.d));
+		//Logger.log(" ");
+		return MathUtil.round(elementData.scaleX, .001);
 	},
 
 	getScaleY: function(elementData, imageData){
 		// TODO remove skewing, spriter does not support
-		//fl.trace(data.frame +" "+ data.name+" sX="+ round(element.scaleX, .001)+" sY="+ round(element.scaleY, .001)+" a="+round(element.matrix.a, .001)+" d="+round(element.matrix.d, .001) + " angle=" + data.angle);
-		//fl.trace("x scale: " + Math.sqrt(element.matrix.a * element.matrix.a + element.matrix.b * element.matrix.b));
-		//fl.trace("y scale: " + Math.sqrt(element.matrix.c * element.matrix.c + element.matrix.d * element.matrix.d));
-		//fl.trace(" ");
-		return Math2.round(elementData.scaleY, .001);
+		//Logger.log(data.frame +" "+ data.name+" sX="+ round(element.scaleX, .001)+" sY="+ round(element.scaleY, .001)+" a="+round(element.matrix.a, .001)+" d="+round(element.matrix.d, .001) + " angle=" + data.angle);
+		//Logger.log("x scale: " + Math.sqrt(element.matrix.a * element.matrix.a + element.matrix.b * element.matrix.b));
+		//Logger.log("y scale: " + Math.sqrt(element.matrix.c * element.matrix.c + element.matrix.d * element.matrix.d));
+		//Logger.log(" ");
+		return MathUtil.round(elementData.scaleY, .001);
 	},
 
 	getAngle: function(elementData, imageData){
 		var angle = 0;
 		
-		 //fl.trace(" "+element.matrix.tx +" "+element.matrix.ty);
+		 //Logger.log(" "+element.matrix.tx +" "+element.matrix.ty);
 		if (isNaN(elementData.rotation)){
-			//fl.trace(data.frame +" "+ data.name+" angle="+ element.rotation+" skew="+element.skewX+":"+element.skewY);
+			//Logger.log(data.frame +" "+ data.name+" angle="+ element.rotation+" skew="+element.skewX+":"+element.skewY);
 			//var scale_factor = Math.sqrt((element.matrix.a * element.matrix.d) - (element.matrix.c * element.matrix.b));
 			//var angle = Math.acos(element.matrix.a / scale_factor) * 180 / Math.PI;
-			//fl.trace(" matrix="+element.matrix.a +" "+element.matrix.b +" "+element.matrix.c +" "+element.matrix.d)
-			//fl.trace((element.matrix.a * element.matrix.d) - (element.matrix.c * element.matrix.b));
-			//fl.trace("scale_factor="+scale_factor);
-			//fl.trace("angle="+angle);
-			//fl.trace(" ");
+			//Logger.log(" matrix="+element.matrix.a +" "+element.matrix.b +" "+element.matrix.c +" "+element.matrix.d)
+			//Logger.log((element.matrix.a * element.matrix.d) - (element.matrix.c * element.matrix.b));
+			//Logger.log("scale_factor="+scale_factor);
+			//Logger.log("angle="+angle);
+			//Logger.log(" ");
 			//return angle;
 			angle = elementData.skewX;
 		} else {
-			//fl.trace(data.frame +" "+ data.name+" angle="+ round(element.rotation, .001));
+			//Logger.log(data.frame +" "+ data.name+" angle="+ round(element.rotation, .001));
 			angle = elementData.rotation;
 		}
 		
-		return Math2.round(-angle, .001);
+		return MathUtil.round(-angle, .001);
 	},
 	
 	getAlpha: function(elementData, imageData){
 		var value = elementData.colorAlphaPercent / 100 + elementData.colorAlphaAmount / 256;
-		return Math2.round(value, .001);
+		return MathUtil.round(value, .001);
 	},
 	
 	getTime: function(totalFrames){

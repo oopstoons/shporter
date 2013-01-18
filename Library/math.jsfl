@@ -3,7 +3,7 @@
  * @author Pedro Chavez
  * @email pedro@oopstoons.com
  */
-var Math2 = {
+var MathUtil = {
 
 	//-----------------------------------------------------------------------------------------------------------------------------
 	// ROUNDING METHODS
@@ -14,12 +14,12 @@ var Math2 = {
 	 * @param $increment The increment to round to. To round to decimal points, set to a decimal value (.1, .01, .25).
 	 * @return The rounded value
 	 * @example <listing>
-	 * Math2.round(239.173)       // 239
-	 * Math2.round(239.173, .01)  // 239.17
-	 * Math2.round(239.173, .1)   // 239.2
-	 * Math2.round(239.173, 5)    // 240
-	 * Math2.round(239.173, 50)   // 250
-	 * Math2.round(239.173, 100)  // 200</listing>
+	 * MathUtil.round(239.173)       // 239
+	 * MathUtil.round(239.173, .01)  // 239.17
+	 * MathUtil.round(239.173, .1)   // 239.2
+	 * MathUtil.round(239.173, 5)    // 240
+	 * MathUtil.round(239.173, 50)   // 250
+	 * MathUtil.round(239.173, 100)  // 200</listing>
 	 */
 	round:function($value, $increment) {
 		$increment = !$increment || $increment <= 0 ? 1 : $increment;
@@ -34,12 +34,12 @@ var Math2 = {
 	 * @param $increment The increment to ceiling to. To ceiling to decimal points, set to a decimal value (.1, .01, .25).
 	 * @return The ceilinged value
 	 * @example <listing>
-	 * Math2.ceil(239.173)       // 240
-	 * Math2.ceil(239.173, .01)  // 239.18
-	 * Math2.ceil(239.173, .1)   // 239.2
-	 * Math2.ceil(239.173, 5)    // 240
-	 * Math2.ceil(239.173, 50)   // 250
-	 * Math2.ceil(239.173, 100)  // 200</listing>
+	 * MathUtil.ceil(239.173)       // 240
+	 * MathUtil.ceil(239.173, .01)  // 239.18
+	 * MathUtil.ceil(239.173, .1)   // 239.2
+	 * MathUtil.ceil(239.173, 5)    // 240
+	 * MathUtil.ceil(239.173, 50)   // 250
+	 * MathUtil.ceil(239.173, 100)  // 200</listing>
 	 */
 	ceil:function($value, $increment) {
 		$increment = !$increment || $increment <= 0 ? 1 : $increment;
@@ -52,12 +52,12 @@ var Math2 = {
 	 * @param $increment The increment to floor to. To floor to decimal points, set to a decimal value (.1, .01, .25).
 	 * @return The floored value
 	 * @example <listing>
-	 * Math2.floor(239.173)      // 239
-	 * Math2.floor(239.173, .01) // 239.17
-	 * Math2.floor(239.173, .1)  // 239.1
-	 * Math2.floor(239.173, 5)   // 235
-	 * Math2.floor(239.173, 50)  // 200
-	 * Math2.floor(239.173, 100) // 200</listing>
+	 * MathUtil.floor(239.173)      // 239
+	 * MathUtil.floor(239.173, .01) // 239.17
+	 * MathUtil.floor(239.173, .1)  // 239.1
+	 * MathUtil.floor(239.173, 5)   // 235
+	 * MathUtil.floor(239.173, 50)  // 200
+	 * MathUtil.floor(239.173, 100) // 200</listing>
 	 */
 	floor:function($value, $increment) {
 		$increment = !$increment || $increment <= 0 ? 1 : $increment;
@@ -74,8 +74,8 @@ var Math2 = {
 	 * @param $value A number to compare against the two above.
 	 * @return The percent of value x between a and b
 	 * @example <listing>
-	 * Math2.getPercent(0, 100, 75)     // .75 (75%) = 75 between 0 and 100
-	 * Math2.getPercent(100, 200, 150)  // .5 (50%) = 150 between 100 and 200</listing>
+	 * MathUtil.getPercent(0, 100, 75)     // .75 (75%) = 75 between 0 and 100
+	 * MathUtil.getPercent(100, 200, 150)  // .5 (50%) = 150 between 100 and 200</listing>
 	 */
 	getPercent:function($a, $b, $value, $clamp) {
 		if ($a == $b){
@@ -92,9 +92,9 @@ var Math2 = {
 	 * @param $value A number to compare against the two above.
 	 * @return The percent of value x between a and b
 	 * @example <listing>
-	 * Math2.getPercent(0, 100, 75)      // .5 (50%) = 75 between 0 and 100
-	 * Math2.getPercent(0, 100, 25)      // -.5 (50%) = 25 between 0 and 100
-	 * Math2.getPercent(100, 200, 150)   // 0 (0%) = 150 between 100 and 200</listing>
+	 * MathUtil.getPercent(0, 100, 75)      // .5 (50%) = 75 between 0 and 100
+	 * MathUtil.getPercent(0, 100, 25)      // -.5 (50%) = 25 between 0 and 100
+	 * MathUtil.getPercent(100, 200, 150)   // 0 (0%) = 150 between 100 and 200</listing>
 	 */
 	getPercent2:function($a, $b, $value, $clamp) {
 		if ($a == $b){
@@ -111,8 +111,8 @@ var Math2 = {
 	 * @param $x A percent between the first and second numbers. 100% = 1
 	 * @return The percent value between a and b
 	 * @example <listing>
-	 * Math2.getValue(0, 100, .75)     // 75 = 75% between 0 and 100
-	 * Math2.getValue(50, 75, .25)     // 56.25 = 25% between 50 and 75</listing>
+	 * MathUtil.getValue(0, 100, .75)     // 75 = 75% between 0 and 100
+	 * MathUtil.getValue(50, 75, .25)     // 56.25 = 25% between 50 and 75</listing>
 	 */
 	getValue:function($a, $b, $percent, $clamp) {
 		var value = ($b - $a) * $percent + $a;
@@ -132,8 +132,8 @@ var Math2 = {
 	 * @param $x A percent between the first and second numbers. 100% = 1
 	 * @return The percent value between a and b
 	 * @example <listing>
-	 * Math2.getValue(0, 100, .75)     // 75 = 75% between 0 and 100
-	 * Math2.getValue(50, 75, .25)     // 56.25 = 25% between 50 and 75</listing>
+	 * MathUtil.getValue(0, 100, .75)     // 75 = 75% between 0 and 100
+	 * MathUtil.getValue(50, 75, .25)     // 56.25 = 25% between 50 and 75</listing>
 	 */
 	getValue2:function($a, $b, $percent, $clamp) {
 		$percent = $percent / 2 + .5;
@@ -188,7 +188,7 @@ var Math2 = {
 	 * @return The proportion to y that a is to b
 	 * @example <listing>
 	 * 1 / 3 = x / 6
-	 * x = Math2.rot(1, 3, 6)    // 2</listing>
+	 * x = MathUtil.rot(1, 3, 6)    // 2</listing>
 	 */
 	rot:function($a, $b, $y) {
 		return (($y * $a) / $b);
@@ -199,7 +199,7 @@ var Math2 = {
 	 * @param $value The number to wrap
 	 * @param $max A maximum number to wrap to
 	 * @return The value wrapped
-	 * @example <listing>Math2.wrap(150, 100)   // 50</listing>
+	 * @example <listing>MathUtil.wrap(150, 100)   // 50</listing>
 	 */
 	wrap:function($value, $max) {
 		return ((($value % $max) + $max) % $max);
@@ -212,9 +212,9 @@ var Math2 = {
 	 * @param	$max	The maximum value.
 	 * @return			The clamped value.
 	 * @example <listing>
-	 * Math2.clamp(105, 100, 120)   // 105
-	 * Math2.clamp(150, 100, 120)   // 120
-	 * Math2.clamp(75, 100, 120)    // 100
+	 * MathUtil.clamp(105, 100, 120)   // 105
+	 * MathUtil.clamp(150, 100, 120)   // 120
+	 * MathUtil.clamp(75, 100, 120)    // 100
 	 * </listing>
 	 */
 	clamp:function($value, $min, $max) {
