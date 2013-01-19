@@ -350,8 +350,8 @@ SpriterExporter.prototype = {
 		node += this.saveAttribute(elementData, imageData, "pivot_x", this.getPivotX, 0);
 		node += this.saveAttribute(elementData, imageData, "pivot_y", this.getPivotY, 1);
 		node += this.saveAttribute(elementData, imageData, "angle", this.getAngle, 0);
-		node += this.saveAttribute(elementData, imageData, "x_scale", this.getScaleX, 1);
-		node += this.saveAttribute(elementData, imageData, "y_scale", this.getScaleY, 1);
+		node += this.saveAttribute(elementData, imageData, "scale_x", this.getScaleX, 1);
+		node += this.saveAttribute(elementData, imageData, "scale_y", this.getScaleY, 1);
 		//node += ' r="' + elementData.r + '"';
 		//node += ' g="' + elementData.g + '"';
 		//node += ' b="' + elementData.b + '"';
@@ -418,17 +418,22 @@ SpriterExporter.prototype = {
 	
 	// TODO global scaling: position, scaling, pivot?
 	getPosition: function(elementData, imageData){
+		// calculate scale
+		var scaleX = elementData.scaleX;
+		var scaleY = elementData.scaleY;
+		elementData.scale = {x:scaleX, y:scaleY};
+		
 		// globalize topleft
-		var topLeft = TrigUtil.rotatePoint(0, 0, imageData.regX, imageData.regY, -elementData.rotation);
+		var topLeft = TrigUtil.rotatePoint(0, 0, imageData.regX * scaleX, imageData.regY * scaleY, -elementData.rotation);
 		topLeft.x = elementData.x - topLeft.x;
 		topLeft.y = elementData.y - topLeft.y;
 		elementData.topLeft = topLeft;
 		
-		// localize the pivot point
-		var localPivot = TrigUtil.rotatePoint(topLeft.x, topLeft.y, elementData.transformX, elementData.transformY, elementData.rotation);
-		localPivot.x = localPivot.x - topLeft.x;
-		localPivot.y = localPivot.y - topLeft.y;
-		elementData.localPivot = localPivot;
+		// calculate the pivot offsets
+		var pivotOffset = TrigUtil.rotatePoint(topLeft.x, topLeft.y, elementData.transformX, elementData.transformY, elementData.rotation);
+		pivotOffset.x = pivotOffset.x - topLeft.x;
+		pivotOffset.y = pivotOffset.y - topLeft.y;
+		elementData.pivotOffset = pivotOffset;
 	},
 
 	getX: function(elementData, imageData){
@@ -442,31 +447,21 @@ SpriterExporter.prototype = {
 	},
 
 	getPivotX: function(elementData, imageData){
-		var value = MathUtil.getPercent(0, imageData.width, elementData.localPivot.x, false);
+		var value = MathUtil.getPercent(0, imageData.width * elementData.scale.x, elementData.pivotOffset.x, false);
 		return MathUtil.round(value, .001);
 	},
 	
 	getPivotY: function(elementData, imageData){
-		var value = MathUtil.getPercent(imageData.height, 0, elementData.localPivot.y, false);
+		var value = MathUtil.getPercent(imageData.height * elementData.scale.y, 0, elementData.pivotOffset.y, false);
 		return MathUtil.round(value, .001);
 	},
 
 	getScaleX: function(elementData, imageData){
-		// TODO remove skewing, spriter does not support
-		//Logger.log(data.frame +" "+ data.name+" sX="+ round(element.scaleX, .001)+" sY="+ round(element.scaleY, .001)+" a="+round(element.matrix.a, .001)+" d="+round(element.matrix.d, .001) + " angle=" + data.angle);
-		//Logger.log("x scale: " + Math.sqrt(element.matrix.a * element.matrix.a + element.matrix.b * element.matrix.b));
-		//Logger.log("y scale: " + Math.sqrt(element.matrix.c * element.matrix.c + element.matrix.d * element.matrix.d));
-		//Logger.log(" ");
-		return MathUtil.round(elementData.scaleX, .001);
+		return MathUtil.round(elementData.scale.x, .001);
 	},
 
 	getScaleY: function(elementData, imageData){
-		// TODO remove skewing, spriter does not support
-		//Logger.log(data.frame +" "+ data.name+" sX="+ round(element.scaleX, .001)+" sY="+ round(element.scaleY, .001)+" a="+round(element.matrix.a, .001)+" d="+round(element.matrix.d, .001) + " angle=" + data.angle);
-		//Logger.log("x scale: " + Math.sqrt(element.matrix.a * element.matrix.a + element.matrix.b * element.matrix.b));
-		//Logger.log("y scale: " + Math.sqrt(element.matrix.c * element.matrix.c + element.matrix.d * element.matrix.d));
-		//Logger.log(" ");
-		return MathUtil.round(elementData.scaleY, .001);
+		return MathUtil.round(elementData.scale.y, .001);
 	},
 
 	getAngle: function(elementData, imageData){
