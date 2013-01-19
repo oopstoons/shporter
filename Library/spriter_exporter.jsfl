@@ -418,19 +418,49 @@ SpriterExporter.prototype = {
 	
 	// TODO global scaling: position, scaling, pivot?
 	getPosition: function(elementData, imageData){
+		
 		// calculate scale
-		var scaleX = elementData.scaleX;
-		var scaleY = elementData.scaleY;
+		Logger.log(elementData.frame +" "+ elementData.name+" sX="+ MathUtil.round(elementData.scaleX, .001)+" sY="+ MathUtil.round(elementData.scaleY, .001)+" a="+MathUtil.round(elementData.matrix.a, .001)+" d="+MathUtil.round(elementData.matrix.d, .001));
+		Logger.log("x scale: " + Math.sqrt(elementData.matrix.a * elementData.matrix.a + elementData.matrix.b * elementData.matrix.b));
+		Logger.log("y scale: " + Math.sqrt(elementData.matrix.c * elementData.matrix.c + elementData.matrix.d * elementData.matrix.d));
+		var scaleX = elementData.matrix.a >= 0 ? elementData.scaleX : -elementData.scaleX;
+		var scaleY = elementData.matrix.d >= 0 ? elementData.scaleY : -elementData.scaleY;
 		elementData.scale = {x:scaleX, y:scaleY};
 		
+		// calculate angle
+			//Logger.log(data.frame +" "+ data.name+" angle="+ element.rotation+" skew="+element.skewX+":"+element.skewY);
+			//var scale_factor = Math.sqrt((element.matrix.a * element.matrix.d) - (element.matrix.c * element.matrix.b));
+			//var angle = Math.acos(element.matrix.a / scale_factor) * 180 / Math.PI;
+			//Logger.log(" matrix="+element.matrix.a +" "+element.matrix.b +" "+element.matrix.c +" "+element.matrix.d)
+			//Logger.log((element.matrix.a * element.matrix.d) - (element.matrix.c * element.matrix.b));
+			//Logger.log("scale_factor="+scale_factor);
+			//Logger.log("angle="+angle);
+			//Logger.log(" ");
+		var angle = 0;
+		if (isNaN(elementData.rotation)){
+			angle = elementData.skewX;
+		} else {
+			angle = elementData.rotation;
+		}
+		if (scaleX < 0 || scaleY < 0){
+			Logger.log("             >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>");
+			angle = angle - 180;
+		} else if (scaleX < 0 && scaleY < 0){
+			Logger.log("             <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<");
+		}
+		elementData.angle = angle;
+		Logger.log("scale: x=" + MathUtil.round(scaleX, .001) + " y=" + MathUtil.round(scaleY, .001));
+		Logger.log("angle: r=" + Math.round(elementData.rotation) + " kX=" + Math.round(elementData.skewX) + " kY=" + Math.round(elementData.skewY) + " a=" + Math.round(angle));
+		Logger.log(" ");
+		
 		// globalize topleft
-		var topLeft = TrigUtil.rotatePoint(0, 0, imageData.regX * scaleX, imageData.regY * scaleY, -elementData.rotation);
+		var topLeft = TrigUtil.rotatePoint(0, 0, imageData.regX * scaleX, imageData.regY * scaleY, -angle);
 		topLeft.x = elementData.x - topLeft.x;
 		topLeft.y = elementData.y - topLeft.y;
 		elementData.topLeft = topLeft;
 		
 		// calculate the pivot offsets
-		var pivotOffset = TrigUtil.rotatePoint(topLeft.x, topLeft.y, elementData.transformX, elementData.transformY, elementData.rotation);
+		var pivotOffset = TrigUtil.rotatePoint(topLeft.x, topLeft.y, elementData.transformX, elementData.transformY, angle);
 		pivotOffset.x = pivotOffset.x - topLeft.x;
 		pivotOffset.y = pivotOffset.y - topLeft.y;
 		elementData.pivotOffset = pivotOffset;
@@ -466,25 +496,13 @@ SpriterExporter.prototype = {
 
 	getAngle: function(elementData, imageData){
 		var angle = 0;
-		
-		 //Logger.log(" "+element.matrix.tx +" "+element.matrix.ty);
 		if (isNaN(elementData.rotation)){
-			//Logger.log(data.frame +" "+ data.name+" angle="+ element.rotation+" skew="+element.skewX+":"+element.skewY);
-			//var scale_factor = Math.sqrt((element.matrix.a * element.matrix.d) - (element.matrix.c * element.matrix.b));
-			//var angle = Math.acos(element.matrix.a / scale_factor) * 180 / Math.PI;
-			//Logger.log(" matrix="+element.matrix.a +" "+element.matrix.b +" "+element.matrix.c +" "+element.matrix.d)
-			//Logger.log((element.matrix.a * element.matrix.d) - (element.matrix.c * element.matrix.b));
-			//Logger.log("scale_factor="+scale_factor);
-			//Logger.log("angle="+angle);
-			//Logger.log(" ");
-			//return angle;
 			angle = elementData.skewX;
 		} else {
-			//Logger.log(data.frame +" "+ data.name+" angle="+ round(element.rotation, .001));
 			angle = elementData.rotation;
 		}
-		
 		return MathUtil.round(-angle, .001);
+		//return MathUtil.round(-elementData.rotation, .001);
 	},
 	
 	getAlpha: function(elementData, imageData){
