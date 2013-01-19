@@ -220,6 +220,8 @@ PNGExporter.prototype = {
 	 * Export the stage as a png.
 	 */
 	saveStage: function(fileName) {
+		fileName = fileName ? fileName : this.inputName;
+		
 		// save doc temporarily
 		var outputDocPath = this.outputPath + "/__DELETE_ME__.fla";
 		fl.saveDocument(fl.getDocumentDOM(), outputDocPath);

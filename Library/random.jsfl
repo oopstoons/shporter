@@ -1,5 +1,5 @@
 /**
- * RandomUtil contains trigonometry functions (dope).
+ * RandomUtil contains random functions (cool).
  * @author Pedro Chavez
  * @email pedro@oopstoons.com
  */

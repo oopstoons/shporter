@@ -1,5 +1,5 @@
 /**
- * Math contains math functions (awesome).
+ * MathUtil contains math functions (awesome).
  * @author Pedro Chavez
  * @email pedro@oopstoons.com
  */
