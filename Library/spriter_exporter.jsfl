@@ -86,7 +86,7 @@ SpriterExporter.prototype = {
 	// EXPORTER METHODS
 	
 	exportMainTimeline:function() {
-		debugObj = {x:[], y:[], r:[]};
+		debugObj = {output:[]};
 		
 		// go to main timeline and select all
 		this.doc.exitEditMode();
@@ -113,9 +113,7 @@ SpriterExporter.prototype = {
 		var filePath = this.docPath + this.docName + ".scml";
 		FLfile.write(filePath, out);
 		
-		//Logger.log("var xxx:Array = [" + debugObj.x.join(", ") + "];");
-		//Logger.log("var yyy:Array = [" + debugObj.y.join(", ") + "];");
-		//Logger.log("var rrr:Array = [" + debugObj.r.join(", ") + "];");
+		Logger.log("var input:Array = [" + debugObj.output.join(", ") + "];");
 	},
 	
 	debugObj:{},
@@ -264,6 +262,8 @@ SpriterExporter.prototype = {
 			var ani = this.aniData[this.aniNames[a]];
 			var aniNode = '<animation id="' + a + '" name="' + ani.name + '" length="' + this.getTime(ani.time) + '" looping="false">';
 			var frameID = 0;
+			Logger.log('=========================================================================================');
+			Logger.log(">>> Ani: " + a + " " + ani.name);
 			out += '		' + aniNode + '\r';
 			
 			// save the timelines
@@ -359,13 +359,15 @@ SpriterExporter.prototype = {
 		//node += ' z_index="' + elementData.depth + '"';
 		node += '/>';
 		
-		//debugObj.x.push('{x:' + elementData.x + ",t:" + elementData.transformX + ",r:" + imageData.regX + ",w:" + imageData.width + ",p:" + elementData.localPivot.x + ",rG:" + elementData.topLeft.x + "}");
-		//debugObj.y.push('{y:' + elementData.y + ",t:" + elementData.transformY + ",r:" + imageData.regY + ",h:" + imageData.height + ",p:" + elementData.localPivot.y + ",rG:" + elementData.topLeft.y + "}");
-		//debugObj.r.push('{r:' + elementData.rotation + "}");
-		//debugObj.x.push("" + Math.round(elementData.localPivot.x)  + " : " + Math.round(elementData.topLeft.x)  + " : " + Math.round(elementData.transformX) + "");
-		//debugObj.y.push("" + Math.round(elementData.localPivot.y)  + " : " + Math.round(elementData.topLeft.y)  + " : " + Math.round(elementData.transformY) + "");
-		//debugObj.x.push("{rx:" + Math.round(elementData.topLeft.x) + ",ry:" + Math.round(elementData.topLeft.y) + ",tx:" + Math.round(elementData.transformX) + ",ty:" + Math.round(elementData.transformY) + ",r:" + elementData.rotation + "}");
-		//debugObj.x.push("" +  Math.round(elementData.localPivot.x) + ":"+Math.round(elementData.localPivot.y) )// + ":" + elementData.topLeft.x + "");
+		// debug output
+		var out = 'n:"' + layerCount + '_' + frameCount + '"';
+		out += ' ,x:' + elementData.x + ' ,tX;' + elementData.transformX + ' ,rX;' + imageData.regX + ' ,w;' + imageData.width;
+		out += ' ,y:' + elementData.y + ' ,tY;' + elementData.transformY + ' ,rY;' + imageData.regY + ' ,h;' + imageData.height;
+		out += ' ,r:' + elementData.rotation;
+		out += ' ,sX:' + elementData.scaleX + ' ,kX;' + elementData.skewX;
+		out += ' ,sY:' + elementData.scaleY + ' ,kY;' + elementData.skewY;
+		out += ' ,ma:' + elementData.matrix.a + ' ,mb:' + elementData.matrix.b + ' ,mc:' + elementData.matrix.c + ' ,md:' + elementData.matrix.d;
+		debugObj.output.push("{" + out + "}");
 		
 		
 		return '				<key id="' + frameCount + '" spin="0">\r					' + node + '\r				</key>\r';
@@ -377,7 +379,7 @@ SpriterExporter.prototype = {
 	},
 
 	/**
-	 * Save an image and it's data.
+	 * Save an image and its data.
 	 */
 	saveImage: function(item, itemFrame, imageName){
 		// save if saved already
@@ -565,7 +567,7 @@ SpriterExporter.prototype = {
 				layer.visible = true;
 			} else {
 				layer.locked = true;
-				layer.visible = false;
+				//layer.visible = false;
 			}
 		}
 	},
