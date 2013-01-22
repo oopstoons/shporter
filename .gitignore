@@ -2,9 +2,12 @@
 bin/
 bin-debug/
 bin-release/
+obj/
 
 # Other files and folders
 .settings/
+*.as3proj
+version.as
 test.swf
 *.bat
 example/*.png

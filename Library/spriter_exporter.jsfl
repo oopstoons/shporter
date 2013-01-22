@@ -21,10 +21,6 @@
  * Support color or alpha transformations.
  * Support main timeline export.
  * Support selected library item or timline element export.
- *
- * BUGS:
- * Math for scaling is wrong: need to read matrix, rotation and skewing to determine if flipped.
- * Math for angles is wrong: need to read skewing.
  */
 fl.runScript(fl.configURI + "Spriter/png_exporter.jsfl");
 fl.runScript(fl.configURI + "Spriter/debug.jsfl");
@@ -50,15 +46,23 @@ SpriterExporter.prototype = {
 	/** The origin document file name. */
 	docName:"",
 	
+	/** The data for all exported animations. */
 	aniData:"",
+	
+	/** The names of all exported animations. */
 	aniNames:"",
+	
+	/** The data for all exported images. */
 	imgData:"",
+	
+	/** The names of all exported images. */
 	imgNames:"",
-	exportImages:true,
+	
+	/** The png exporter. */
 	pngExporter:"",
 	
-	/** Logger. */
-	//logger:null,
+	/** For debugging. */
+	exportImages:true,
 
 	//-----------------------------------------------------------------------------------------------------------------------------
 	// CONSTRUCTER METHOD
@@ -74,10 +78,7 @@ SpriterExporter.prototype = {
 		this.imgData = {};
 		this.aniNames = [];
 		this.imgNames = [];
-		
-		//this.logger = new Logger();
 		this.pngExporter = new PNGExporter(fl.getDocumentDOM(), null);
-		//this.pngExporter.logger = this.logger;
 		
 		Debug.dumpMaxLevels = 2;
 	},
@@ -86,20 +87,17 @@ SpriterExporter.prototype = {
 	// EXPORTER METHODS
 	
 	exportMainTimeline:function() {
-		debugObj = {output:[]};
-		
 		// go to main timeline and select all
 		this.doc.exitEditMode();
 		this.doc.selectAll();
 		var selection = this.doc.selection;
 		
-		Logger.log("selection: " + selection.length);
-		//Debug.dump(selection, "selection");
+		Logger.log("selection: total=" + selection.length);
 		
 		// iterate through all slected items and export valid items
 		for(var i = 0; i < selection.length; i++){
 			var element = selection[i];
-		Logger.log("element: " + i + " " +element);
+			Logger.log("element: " + i + " " +element);
 			if (this.isValidAniLayer(element.layer) && this.isValidAni(element)){
 				this.prepLayers(element);
 				this.readAniSymbol(element);
@@ -108,18 +106,19 @@ SpriterExporter.prototype = {
 		
 		// output the xml
 		var out = this.saveData();
+		//Logger.log("\r\r\r" + out);
 		
 		// save the file
 		var filePath = this.docPath + this.docName + ".scml";
 		FLfile.write(filePath, out);
-		
-		Logger.log("var input:Array = [" + debugObj.output.join(", ") + "];");
 	},
 	
-	debugObj:{},
+	exportSelectedElements:function() {
+		// TODO export selected animations: current timeline selection
+	},
 	
-	exportAnimations:function() {
-		// TODO export selected animations (current timeline selection or library selection?)
+	exportSelectedItems:function() {
+		// TODO export selected animations: library selection
 	},
 
 	//-----------------------------------------------------------------------------------------------------------------------------
@@ -194,43 +193,81 @@ SpriterExporter.prototype = {
 	 */
 	readElement: function(element, depth, frameNum){
 		// TODO save shape data
-		var data = {};
-		data.element = element;
-		data.frame = frameNum;
+		var elementData = {};
+		elementData.element = element;
+		elementData.frame = frameNum;
 		// TODO read multiframe movieclips and graphics with loop/playonce blendmodes
 		// BUG only reads graphic frames from keyframes and movieclip frame 0
-		data.elementFrame = element.symbolType == "graphic" ? element.firstFrame : 0;
-		data.name = this.fixName(element.libraryItem.name) + this.padLeft(data.elementFrame, 4, "0");
+		elementData.elementFrame = element.symbolType == "graphic" ? element.firstFrame : 0;
+		elementData.name = this.fixName(element.libraryItem.name) + this.padLeft(elementData.elementFrame, 4, "0");
 		
 		// position
-		data.x = element.x;
-		data.y = element.y;
-		data.depth = element.depth;
-		data.transformX = element.transformX;
-		data.transformY = element.transformY;
+		elementData.x = element.x;
+		elementData.y = element.y;
+		elementData.depth = element.depth;
+		elementData.transformX = element.transformX;
+		elementData.transformY = element.transformY;
 		
 		// rotation and scaling
-		data.rotation = element.rotation;
-		data.matrix = element.matrix;
-		data.skewX = element.skewX;
-		data.skewY = element.skewY;
-		data.scaleX = element.scaleX;
-		data.scaleY = element.scaleY;
+		elementData.rotation = element.rotation;
+		elementData.matrix = element.matrix;
+		elementData.skewX = element.skewX;
+		elementData.skewY = element.skewY;
+		elementData.scaleX = element.scaleX;
+		elementData.scaleY = element.scaleY;
 		
 		// color
-		data.colorRedAmount = element.colorRedAmount;
-		data.colorRedPercent = element.colorRedPercent;
-		data.colorGreenAmount = element.colorGreenAmount;
-		data.colorGreenPercent = element.colorGreenPercent;
-		data.colorBlueAmount = element.colorBlueAmount;
-		data.colorBluePercent = element.colorBluePercent;
-		data.colorAlphaAmount = element.colorAlphaAmount;
-		data.colorAlphaPercent = element.colorAlphaPercent;
+		elementData.colorRedAmount = element.colorRedAmount;
+		elementData.colorRedPercent = element.colorRedPercent;
+		elementData.colorGreenAmount = element.colorGreenAmount;
+		elementData.colorGreenPercent = element.colorGreenPercent;
+		elementData.colorBlueAmount = element.colorBlueAmount;
+		elementData.colorBluePercent = element.colorBluePercent;
+		elementData.colorAlphaAmount = element.colorAlphaAmount;
+		elementData.colorAlphaPercent = element.colorAlphaPercent;
 		
 		// save image
-		this.saveImage(element.libraryItem, data.elementFrame, data.name);
+		var imageData = this.saveImage(element.libraryItem, elementData.elementFrame, elementData.name);
 		
-		return data;
+		// calculate advanced properties
+		this.calculateElementProperties(elementData, imageData);
+		
+		return elementData;
+	},
+	
+	/**
+	 * Calculate advanced position, scaling, angle, and pivot properties.
+	 */
+	calculateElementProperties: function(elementData, imageData){
+		// TODO global scaling: position, scaling, pivot?
+		
+		// calculate scale & angle
+		var scaleX = 1;
+		var scaleY = 1;
+		var angle = 0;
+		if (isNaN(elementData.rotation)){
+			scaleX = elementData.matrix.a >= 0 ? elementData.scaleX : -elementData.scaleX;
+			scaleY = elementData.matrix.d >= 0 ? elementData.scaleY : -elementData.scaleY;
+			angle = scaleX < 0 ? elementData.skewX : elementData.skewX + 180;
+		} else {
+			scaleX = elementData.scaleX;
+			scaleY = elementData.scaleY;
+			angle = elementData.rotation;
+		}
+		elementData.angle = angle;
+		elementData.scale = {x:scaleX, y:scaleY};
+		
+		// globalize topleft
+		var topLeft = TrigUtil.rotatePoint(0, 0, imageData.regX * scaleX, imageData.regY * scaleY, -angle);
+		topLeft.x = elementData.x - topLeft.x;
+		topLeft.y = elementData.y - topLeft.y;
+		elementData.topLeft = topLeft;
+		
+		// calculate the pivot offsets
+		var pivotOffset = TrigUtil.rotatePoint(topLeft.x, topLeft.y, elementData.transformX, elementData.transformY, angle);
+		pivotOffset.x = pivotOffset.x - topLeft.x;
+		pivotOffset.y = pivotOffset.y - topLeft.y;
+		elementData.pivotOffset = pivotOffset;
 	},
 
 	//-----------------------------------------------------------------------------------------------------------------------------
@@ -320,9 +357,6 @@ SpriterExporter.prototype = {
 		}
 		out += '	</entity>\r';
 		out += '</spriter_data>';
-
-		Logger.log("\r\r\r");
-		Logger.log(out);
 		
 		return out;
 	},
@@ -342,8 +376,6 @@ SpriterExporter.prototype = {
 		
 		var imageData = this.imgData[elementData.name];
 		
-		this.getPosition(elementData, imageData);
-		
 		var node = '<object folder="0" file="' + this.getImgId(elementData.name) + '"';
 		node += this.saveAttribute(elementData, imageData, "x", this.getX, 0);
 		node += this.saveAttribute(elementData, imageData, "y", this.getY, 0);
@@ -352,23 +384,9 @@ SpriterExporter.prototype = {
 		node += this.saveAttribute(elementData, imageData, "angle", this.getAngle, 0);
 		node += this.saveAttribute(elementData, imageData, "scale_x", this.getScaleX, 1);
 		node += this.saveAttribute(elementData, imageData, "scale_y", this.getScaleY, 1);
-		//node += ' r="' + elementData.r + '"';
-		//node += ' g="' + elementData.g + '"';
-		//node += ' b="' + elementData.b + '"';
 		node += this.saveAttribute(elementData, imageData, "a", this.getAlpha, 1);
 		//node += ' z_index="' + elementData.depth + '"';
 		node += '/>';
-		
-		// debug output
-		var out = 'n:"' + layerCount + '_' + frameCount + '"';
-		out += ' ,x:' + elementData.x + ' ,tX;' + elementData.transformX + ' ,rX;' + imageData.regX + ' ,w;' + imageData.width;
-		out += ' ,y:' + elementData.y + ' ,tY;' + elementData.transformY + ' ,rY;' + imageData.regY + ' ,h;' + imageData.height;
-		out += ' ,r:' + elementData.rotation;
-		out += ' ,sX:' + elementData.scaleX + ' ,kX;' + elementData.skewX;
-		out += ' ,sY:' + elementData.scaleY + ' ,kY;' + elementData.skewY;
-		out += ' ,ma:' + elementData.matrix.a + ' ,mb:' + elementData.matrix.b + ' ,mc:' + elementData.matrix.c + ' ,md:' + elementData.matrix.d;
-		debugObj.output.push("{" + out + "}");
-		
 		
 		return '				<key id="' + frameCount + '" spin="0">\r					' + node + '\r				</key>\r';
 	},
@@ -384,7 +402,7 @@ SpriterExporter.prototype = {
 	saveImage: function(item, itemFrame, imageName){
 		// save if saved already
 		if (!this.isNewImage(imageName)){
-			return;
+			return this.imgData[imageName];
 		}
 		
 		// export image
@@ -410,61 +428,11 @@ SpriterExporter.prototype = {
 		Logger.log("--- SAVEIMAGE " + imageName);
 		this.imgData[imageName] = imageData;
 		this.imgNames.push(imageName);
-		return imageName;
+		return imageData;
 	},
 
 	//-----------------------------------------------------------------------------------------------------------------------------
 	// GETTERS
-	
-	// TODO global scaling: position, scaling, pivot?
-	getPosition: function(elementData, imageData){
-		
-		// calculate scale
-		Logger.log(elementData.frame +" "+ elementData.name+" sX="+ MathUtil.round(elementData.scaleX, .001)+" sY="+ MathUtil.round(elementData.scaleY, .001)+" a="+MathUtil.round(elementData.matrix.a, .001)+" d="+MathUtil.round(elementData.matrix.d, .001));
-		Logger.log("x scale: " + Math.sqrt(elementData.matrix.a * elementData.matrix.a + elementData.matrix.b * elementData.matrix.b));
-		Logger.log("y scale: " + Math.sqrt(elementData.matrix.c * elementData.matrix.c + elementData.matrix.d * elementData.matrix.d));
-		var scaleX = elementData.matrix.a >= 0 ? elementData.scaleX : -elementData.scaleX;
-		var scaleY = elementData.matrix.d >= 0 ? elementData.scaleY : -elementData.scaleY;
-		elementData.scale = {x:scaleX, y:scaleY};
-		
-		// calculate angle
-			//Logger.log(data.frame +" "+ data.name+" angle="+ element.rotation+" skew="+element.skewX+":"+element.skewY);
-			//var scale_factor = Math.sqrt((element.matrix.a * element.matrix.d) - (element.matrix.c * element.matrix.b));
-			//var angle = Math.acos(element.matrix.a / scale_factor) * 180 / Math.PI;
-			//Logger.log(" matrix="+element.matrix.a +" "+element.matrix.b +" "+element.matrix.c +" "+element.matrix.d)
-			//Logger.log((element.matrix.a * element.matrix.d) - (element.matrix.c * element.matrix.b));
-			//Logger.log("scale_factor="+scale_factor);
-			//Logger.log("angle="+angle);
-			//Logger.log(" ");
-		var angle = 0;
-		if (isNaN(elementData.rotation)){
-			angle = elementData.skewX;
-		} else {
-			angle = elementData.rotation;
-		}
-		if (scaleX < 0 || scaleY < 0){
-			Logger.log("             >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>");
-			angle = angle - 180;
-		} else if (scaleX < 0 && scaleY < 0){
-			Logger.log("             <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<");
-		}
-		elementData.angle = angle;
-		Logger.log("scale: x=" + MathUtil.round(scaleX, .001) + " y=" + MathUtil.round(scaleY, .001));
-		Logger.log("angle: r=" + Math.round(elementData.rotation) + " kX=" + Math.round(elementData.skewX) + " kY=" + Math.round(elementData.skewY) + " a=" + Math.round(angle));
-		Logger.log(" ");
-		
-		// globalize topleft
-		var topLeft = TrigUtil.rotatePoint(0, 0, imageData.regX * scaleX, imageData.regY * scaleY, -angle);
-		topLeft.x = elementData.x - topLeft.x;
-		topLeft.y = elementData.y - topLeft.y;
-		elementData.topLeft = topLeft;
-		
-		// calculate the pivot offsets
-		var pivotOffset = TrigUtil.rotatePoint(topLeft.x, topLeft.y, elementData.transformX, elementData.transformY, angle);
-		pivotOffset.x = pivotOffset.x - topLeft.x;
-		pivotOffset.y = pivotOffset.y - topLeft.y;
-		elementData.pivotOffset = pivotOffset;
-	},
 
 	getX: function(elementData, imageData){
 		var value = elementData.transformX;
@@ -495,14 +463,7 @@ SpriterExporter.prototype = {
 	},
 
 	getAngle: function(elementData, imageData){
-		var angle = 0;
-		if (isNaN(elementData.rotation)){
-			angle = elementData.skewX;
-		} else {
-			angle = elementData.rotation;
-		}
-		return MathUtil.round(-angle, .001);
-		//return MathUtil.round(-elementData.rotation, .001);
+		return MathUtil.round(-elementData.angle, .001);
 	},
 	
 	getAlpha: function(elementData, imageData){
@@ -580,7 +541,6 @@ SpriterExporter.prototype = {
 				layer.visible = true;
 			} else {
 				layer.locked = true;
-				//layer.visible = false;
 			}
 		}
 	},
