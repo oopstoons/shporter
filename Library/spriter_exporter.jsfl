@@ -280,28 +280,28 @@ SpriterExporter.prototype = {
 		Logger.log('=========================================================================================');
 		Logger.log('=== SAVE DATA');
 		
-		var out = '<?xml version="1.0" encoding="UTF-8"?>\r';
-		out += '<spriter_data scml_version="1.0" generator="BrashMonkey Spriter" generator_version="a4.1">\r';
+		var out = '<?xml version="1.0" encoding="UTF-8"?>\r\n';
+		out += '<spriter_data scml_version="1.0" generator="BrashMonkey Spriter" generator_version="a4.1">\r\n';
 		
 		// output the image xml
-		out += '	<folder id="0">\r';
+		out += '	<folder id="0">\r\n';
 		for(var i = 0; i < this.imgNames.length; i++){
 			var img = this.imgData[this.imgNames[i]];
 			//var imgNode = '<file type="image" id="' + i + '" name="' + img.name + '.png" pivotx="' + img.regX + '" pivoty="' + img.regY + '"/>';
 			var imgNode = '<file id="' + i + '" name="' + img.name + '.png" width="' + img.width + '" height="' + img.height + '"/>';
-			out += '		' + imgNode + '\r';
+			out += '		' + imgNode + '\r\n';
 		}
-		out += '	</folder>\r';
+		out += '	</folder>\r\n';
 		
 		// output the animation xml
-		out += '	<entity id="0" name="test">\r';
+		out += '	<entity id="0" name="test">\r\n';
 		for(var a = 0; a < this.aniNames.length; a++){
 			var ani = this.aniData[this.aniNames[a]];
 			var aniNode = '<animation id="' + a + '" name="' + ani.name + '" length="' + this.getTime(ani.time) + '" looping="false">';
 			var frameID = 0;
 			Logger.log('=========================================================================================');
 			Logger.log(">>> Ani: " + a + " " + ani.name);
-			out += '		' + aniNode + '\r';
+			out += '		' + aniNode + '\r\n';
 			
 			// save the timelines
 			var timelineOut = "";
@@ -309,18 +309,18 @@ SpriterExporter.prototype = {
 				var layer = ani.layerData[l];
 				Logger.log(">> Layer: " + l + " " + layer);
 				if (layer.length) {
-					timelineOut += '			<timeline id="' + l + '">\r';
+					timelineOut += '			<timeline id="' + l + '">\r\n';
 					for(var f = 0; f < layer.length; f++){
 						var frame = layer[f];
 						timelineOut += this.saveTimelineKey(frame, f, l);
 					}
-					timelineOut += '			</timeline>\r';
+					timelineOut += '			</timeline>\r\n';
 				}
 			}
 			
 			// save the main timeline
 			var mainlineOut = "";
-			mainlineOut += '			<mainline>\r';
+			mainlineOut += '			<mainline>\r\n';
 			var keyframeCount = 0;
 			for(var t = 0; t < ani.time; t++){
 				var foundKeyFrame = false;
@@ -334,7 +334,7 @@ SpriterExporter.prototype = {
 							
 							if (!foundKeyFrame){
 								foundKeyFrame = true;
-								mainlineOut += '				<key id="' + keyframeCount + '" time="' + this.getTime(t) + '">\r';
+								mainlineOut += '				<key id="' + keyframeCount + '" time="' + this.getTime(t) + '">\r\n';
 							}
 						
 							mainlineOut += this.saveMainlineKey(frame, keyframeCount, itemCount);
@@ -344,18 +344,18 @@ SpriterExporter.prototype = {
 				}
 				
 				if (foundKeyFrame){
-					mainlineOut += '				</key>\r';
+					mainlineOut += '				</key>\r\n';
 					keyframeCount++;
 				}
 			}
 			
-			mainlineOut += '			</mainline>\r';
+			mainlineOut += '			</mainline>\r\n';
 			
 			out += mainlineOut;
 			out += timelineOut;
-			out += '		</animation>\r';
+			out += '		</animation>\r\n';
 		}
-		out += '	</entity>\r';
+		out += '	</entity>\r\n';
 		out += '</spriter_data>';
 		
 		return out;
@@ -367,7 +367,7 @@ SpriterExporter.prototype = {
 		node += ' key="' + sprite.keyID + '"';
 		//node += ' z_index="' + sprite.XXX + '"';
 		node += '/>';
-		return '					' + node + '\r';
+		return '					' + node + '\r\n';
 	},
 	
 	saveTimelineKey: function(elementData, frameCount, layerCount){
@@ -388,7 +388,7 @@ SpriterExporter.prototype = {
 		//node += ' z_index="' + elementData.depth + '"';
 		node += '/>';
 		
-		return '				<key id="' + frameCount + '" spin="0">\r					' + node + '\r				</key>\r';
+		return '				<key id="' + frameCount + '" spin="0">\r\n					' + node + '\r\n				</key>\r\n';
 	},
 	
 	saveAttribute: function(elementData, imageData, attributeName, func, defaultValue){
