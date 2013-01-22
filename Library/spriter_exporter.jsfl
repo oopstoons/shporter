@@ -360,22 +360,36 @@ SpriterExporter.prototype = {
 		
 		return out;
 	},
-	
+
+	/**
+	 * Save a mainline object.
+	 */
 	saveMainlineKey: function(sprite, keyframeCount, itemCount){
 		var node = '<object_ref id="' + itemCount + '"';
 		node += ' timeline="' + sprite.timelineID + '"';
 		node += ' key="' + sprite.keyID + '"';
-		//node += ' z_index="' + sprite.XXX + '"';
+		node += ' z_index="' + itemCount + '"';
 		node += '/>';
 		return '					' + node + '\r\n';
 	},
-	
+
+	/**
+	 * Save a timeline key.
+	 */
 	saveTimelineKey: function(elementData, frameCount, layerCount){
 		elementData.timelineID = layerCount;
 		elementData.keyID = frameCount;
 		
+		// create key attributes
+		var idData = ' id="' + frameCount + '"';
+		var keyTime = this.getTime(elementData.frame);
+		var keyData = !keyTime ? "" : ' time="' + keyTime + '"';
+		var spinData = ' spin="' + 0 + '"';
+		
+		// find image data
 		var imageData = this.imgData[elementData.name];
 		
+		// create object node
 		var node = '<object folder="0" file="' + this.getImgId(elementData.name) + '"';
 		node += this.saveAttribute(elementData, imageData, "x", this.getX, 0);
 		node += this.saveAttribute(elementData, imageData, "y", this.getY, 0);
@@ -385,12 +399,14 @@ SpriterExporter.prototype = {
 		node += this.saveAttribute(elementData, imageData, "scale_x", this.getScaleX, 1);
 		node += this.saveAttribute(elementData, imageData, "scale_y", this.getScaleY, 1);
 		node += this.saveAttribute(elementData, imageData, "a", this.getAlpha, 1);
-		//node += ' z_index="' + elementData.depth + '"';
 		node += '/>';
 		
-		return '				<key id="' + frameCount + '" spin="0">\r\n					' + node + '\r\n				</key>\r\n';
+		return '				<key' + idData + keyData + spinData + '>\r\n					' + node + '\r\n				</key>\r\n';
 	},
-	
+
+	/**
+	 * Save an attribute.
+	 */
 	saveAttribute: function(elementData, imageData, attributeName, func, defaultValue){
 		var value = func(elementData, imageData);
 		return value != defaultValue ? ' ' + attributeName + '="' + value + '"' : "";
