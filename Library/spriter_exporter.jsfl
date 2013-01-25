@@ -148,38 +148,11 @@ SpriterExporter.prototype = {
 		
 		// read all layers in the timeline
 		for(var layerNum = 0; layerNum < data.item.timeline.layerCount; layerNum++) {
-			var layer = data.item.timeline.layers[layerNum];
 			
-			if (this.isValidAniLayer(layer)){
-				layer.locked = false;
-				var frameData = [];
-				Logger.log("--- READLAYER " + layer.name);
-				
-				// read all frames in the layer
-				for(var frameNum = 0; frameNum < layer.frameCount; frameNum++){
-					var frame = layer.frames[frameNum];
-					if (this.isValidAniFrame(frame, frameNum)){
-						this.ungroupFrameElements(frame, frameNum, data.item);
-						Logger.log("-- frame:" + frameNum+ ", " + frame.tweenType + ", " + frame.elements);
-						
-						// read all elements in the frame
-						for(var elementNum = 0; elementNum < frame.elements.length; elementNum++){
-							var element = frame.elements[elementNum];
-							if (this.isValidAniElement(element) && elementNum == 0){
-								
-								// add element data to timeline data
-								var elementData = this.readElement(element, elementNum, frameNum);
-								frameData.push(elementData);
-							}
-						}
-					}
-				}
-				
-				// add to layer data only if data exists
-				Logger.log("--- LAYER " + frameData);
-				if (frameData.length) {
-					data.layerData.unshift(frameData);
-				}
+			// add to layer data only if data exists
+			var frameData = this.readLayer(aniInstance, layerNum);
+			if (frameData.length) {
+				data.layerData.unshift(frameData);
 			}
 		}
 		
@@ -189,12 +162,80 @@ SpriterExporter.prototype = {
 	},
 	
 	/**
+	 * Read a layer from a timeline.
+	 */
+	readLayer:function(aniInstance, layerNum){
+		// get the layer
+		var layer = aniInstance.libraryItem.timeline.layers[layerNum];
+		aniInstance.libraryItem.timeline.setSelectedLayers(layerNum);
+		
+		// continue if valid layer
+		var frameData = [];
+		if (this.isValidAniLayer(layer)){
+			layer.locked = false;
+			Logger.log("--- READLAYER " + layer.name);
+			
+			// read all frames in the layer
+			for(var frameNum = 0; frameNum < layer.frameCount; frameNum++){
+				var elementData = this.readFrame(aniInstance, layer, frameNum);
+				if (elementData){
+					frameData.push(elementData);
+				}
+			}
+		}
+		
+		// return the data
+		return frameData;
+	},
+	
+	/**
+	 * Read a frame from a layer.
+	 */
+	readFrame:function(aniInstance, layer, frameNum){
+		// get the frame, if it's not a keyframe make it a keyframe temporarily
+		var frame = layer.frames[frameNum];
+		var tempKeyframe = frame.startFrame == frameNum ? false : true;
+		if (tempKeyframe) {
+			aniInstance.libraryItem.timeline.convertToKeyframes(frameNum);
+			frame = layer.frames[frameNum];
+		}
+		
+		// ungroup any elements in this frame
+		this.ungroupFrameElements(frame, frameNum, aniInstance);
+		
+		// continue if valid frame
+		var elementData = null;
+		if (this.isValidAniFrame(frame, frameNum)){
+			Logger.log("-- frame:" + frameNum+ ", " + frame.startFrame + ", " + tempKeyframe + " " + frame.tweenType + ", " + frame.elements[0].x + " " + frame.elements);
+			
+			// read the first valid element in the frame
+			for(var elementNum = 0; elementNum < frame.elements.length; elementNum++){
+				var element = frame.elements[elementNum];
+				if (this.isValidAniElement(element) && elementNum == 0){
+					
+					// add element data to timeline data
+					elementData = this.readElement(element, elementNum, frameNum);
+				}
+			}
+		}
+		
+		// clear a temporary keyframe
+		if (tempKeyframe) {
+			aniInstance.libraryItem.timeline.clearKeyframes(frameNum);
+		}
+		
+		// return the data
+		return elementData;
+	},
+	
+	/**
 	 * Read the data for an element in an animation.
 	 */
 	readElement: function(element, depth, frameNum){
+		Logger.log("--- readElement:" + depth + " " + frameNum);
 		// TODO save shape data
 		var elementData = {};
-		elementData.element = element;
+		//elementData.element = element;
 		elementData.frame = frameNum;
 		// TODO read multiframe movieclips and graphics with loop/playonce blendmodes
 		// BUG only reads graphic frames from keyframes and movieclip frame 0
@@ -508,7 +549,8 @@ SpriterExporter.prototype = {
 
 	isValidAniFrame: function(frame, i){
 		// TODO if graphic plays/loops frame, then dont ignore non startframes
-		return (frame.startFrame == i && frame.tweenType != "shape");
+		//return (frame.startFrame == i && frame.tweenType != "shape");
+		return (frame.tweenType != "shape");
 	},
 
 	isValidAniElement: function(element){
