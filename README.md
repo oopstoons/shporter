@@ -9,13 +9,6 @@ Did you animate it in Flash puppet/modular style? If yes, then you are in luck m
 Shporter will export your Flash timeline animations and keep all your modular data intact. 
 Save tons of memory and file space!
 
-## Exporting
-### DO
-### DON'T
-
-## Importing
-### Spriter
-
 ## Road Map:
 - Export textures and/or animation at a given scale 
 - Research the following Unity 2D animation systems for export possibilities
