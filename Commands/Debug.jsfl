@@ -1,4 +1,4 @@
-fl.runScript(fl.configURI + "Spriter/math.jsfl");
+fl.runScript(fl.configURI + "Shporter/math.jsfl");
 
 init();
 

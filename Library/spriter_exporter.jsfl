@@ -22,11 +22,11 @@
  * Support main timeline export.
  * Support selected library item or timline element export.
  */
-fl.runScript(fl.configURI + "Spriter/png_exporter.jsfl");
-fl.runScript(fl.configURI + "Spriter/debug.jsfl");
-fl.runScript(fl.configURI + "Spriter/math.jsfl");
-fl.runScript(fl.configURI + "Spriter/trig.jsfl");
-fl.runScript(fl.configURI + "Spriter/logger.jsfl");
+fl.runScript(fl.configURI + "Shporter/png_exporter.jsfl");
+fl.runScript(fl.configURI + "Shporter/debug.jsfl");
+fl.runScript(fl.configURI + "Shporter/math.jsfl");
+fl.runScript(fl.configURI + "Shporter/trig.jsfl");
+fl.runScript(fl.configURI + "Shporter/logger.jsfl");
 
 function SpriterExporter() {
 	this.constructer();

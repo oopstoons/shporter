@@ -6,7 +6,7 @@
  *
  * May have to load in: fl.configURI + 'Javascript/ObjectFindAndSelect.jsfl'.
  */
-fl.runScript(fl.configURI + "Spriter/logger.jsfl");
+fl.runScript(fl.configURI + "Shporter/logger.jsfl");
 
 function PNGExporter(doc, outputPath) {
 	this.constructer(doc, outputPath);

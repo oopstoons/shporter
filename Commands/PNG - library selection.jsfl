@@ -1,5 +1,5 @@
-fl.runScript(fl.configURI + "Spriter/png_exporter.jsfl");
-fl.runScript(fl.configURI + "Spriter/logger.jsfl");
+fl.runScript(fl.configURI + "Shporter/png_exporter.jsfl");
+fl.runScript(fl.configURI + "Shporter/logger.jsfl");
 
 init();
 
