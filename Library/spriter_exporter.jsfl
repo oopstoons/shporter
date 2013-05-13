@@ -46,6 +46,9 @@ SpriterExporter.prototype = {
 	/** The origin document file name. */
 	docName:"",
 	
+	/** The name of the project. */
+	projectName:"",
+	
 	/** The data for all exported animations. */
 	aniData:"",
 	
@@ -74,11 +77,14 @@ SpriterExporter.prototype = {
 		this.doc = fl.getDocumentDOM();
 		this.docPath = this.doc.pathURI.replace(/[^.\/]+\.fla/, "");
 		this.docName = this.doc.pathURI.replace(/.+?([^.\/]+)\.fla/, "$1");
+		this.projectName = this.docName;
 		this.aniData = {};
 		this.imgData = {};
 		this.aniNames = [];
 		this.imgNames = [];
 		this.pngExporter = new PNGExporter(fl.getDocumentDOM(), null);
+		this.pngExporter.outputPath += this.projectName;
+		FLfile.createFolder(this.pngExporter.outputPath);
 		
 		Debug.dumpMaxLevels = 2;
 	},
@@ -109,7 +115,7 @@ SpriterExporter.prototype = {
 		//Logger.log("\r\r\r" + out);
 		
 		// save the file
-		var filePath = this.docPath + this.docName + ".scml";
+		var filePath = this.docPath + this.projectName + ".scml";
 		FLfile.write(filePath, out);
 	},
 	
@@ -335,7 +341,7 @@ SpriterExporter.prototype = {
 		out += '<spriter_data scml_version="1.0" generator="BrashMonkey Spriter" generator_version="a4.1">\r\n';
 		
 		// output the image xml
-		out += '	<folder id="0">\r\n';
+		out += '	<folder id="0" name="' + this.projectName + '">\r\n';
 		for(var i = 0; i < this.imgNames.length; i++){
 			var img = this.imgData[this.imgNames[i]];
 			//var imgNode = '<file type="image" id="' + i + '" name="' + img.name + '.png" pivotx="' + img.regX + '" pivoty="' + img.regY + '"/>';
