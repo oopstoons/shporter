@@ -4,6 +4,9 @@ bin-debug/
 bin-release/
 obj/
 
+# Compiled Files
+*.zxp
+
 # Other files and folders
 .settings/
 *.as3proj
