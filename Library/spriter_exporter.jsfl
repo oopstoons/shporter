@@ -136,6 +136,7 @@ SpriterExporter.prototype = {
 		data.scaleX = aniInstance.scaleX;
 		data.scaleY = aniInstance.scaleY;
 		data.layerData = [];
+		data.layerMeta = [];
 		
 		// don't read if same named animation exists
 		if (!this.isNewAni(data.name)){
@@ -153,7 +154,16 @@ SpriterExporter.prototype = {
 			var frameData = this.readLayer(aniInstance, layerNum);
 			if (frameData.length) {
 				data.layerData.unshift(frameData);
+				
+				// save layer meta
+				var layer = aniInstance.libraryItem.timeline.layers[layerNum];
+				data.layerMeta.unshift(layer.name);
 			}
+		}
+		
+		// ensure unique names for layers
+		for(var layerNum = 0; layerNum < data.layerData.length; layerNum++){
+			data.layerMeta[layerNum] = this.uniquifyLayerName(data.layerMeta, layerNum, 0);
 		}
 		
 		// save animation
@@ -346,14 +356,15 @@ SpriterExporter.prototype = {
 			
 			// save the timelines
 			var timelineOut = "";
-			for(var l = 0; l < ani.layerData.length; l++){
-				var layer = ani.layerData[l];
-				Logger.log(">> Layer: " + l + " " + layer);
-				if (layer.length) {
-					timelineOut += '			<timeline id="' + l + '">\r\n';
-					for(var f = 0; f < layer.length; f++){
-						var frame = layer[f];
-						timelineOut += this.saveTimelineKey(frame, f, l);
+			for(var layerNum = 0; layerNum < ani.layerData.length; layerNum++){
+				var layerData = ani.layerData[layerNum];
+				var layerMeta = ani.layerMeta[layerNum];
+				Logger.log(">> Layer: " + layerNum + " " + layerData);
+				if (layerData.length) {
+					timelineOut += '			<timeline id="' + layerNum + '" name="' + layerMeta + '">\r\n';
+					for(var f = 0; f < layerData.length; f++){
+						var frame = layerData[f];
+						timelineOut += this.saveTimelineKey(frame, f, layerNum);
 					}
 					timelineOut += '			</timeline>\r\n';
 				}
@@ -367,10 +378,10 @@ SpriterExporter.prototype = {
 				var foundKeyFrame = false;
 				var itemCount = 0;
 				
-				for(var l = 0; l < ani.layerData.length; l++){
-					var layer = ani.layerData[l];
-					for(var f = 0; f < layer.length; f++){
-						var frame = layer[f];
+				for(var layerNum = 0; layerNum < ani.layerData.length; layerNum++){
+					var layerData = ani.layerData[layerNum];
+					for(var f = 0; f < layerData.length; f++){
+						var frame = layerData[f];
 						if (frame.frame == t){
 							
 							if (!foundKeyFrame){
@@ -605,6 +616,22 @@ SpriterExporter.prototype = {
 
 	//-----------------------------------------------------------------------------------------------------------------------------
 	// UTIL METHODS
+	
+	/* Find a unique layer name. */
+	uniquifyLayerName:function(layerMeta, currentLayerNum, extra){
+		var layerName = layerMeta[currentLayerNum] + (extra ? "_" + extra : "");
+		var isUnique = true;
+		
+		// if name is not unique increment it until it is
+		for(var layerNum = 0; layerNum < currentLayerNum; layerNum++){
+			if (layerMeta[layerNum] == layerName) {
+				isUnique = false;
+				layerName = this.uniquifyLayerName(layerMeta, currentLayerNum, extra + 1);
+				break;
+			}
+		}
+		return layerName;
+	},
 
 	fixName: function(assetName){
 		assetName = assetName.replace(/^(.+\/)/igm, "");
