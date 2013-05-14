@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<macromedia-extension name="Shporter" version="1.0.0" type="command">
+	<author name="Pedro Chavez" />
+	<products>
+		<product name="Flash" version="11" primary="true" required="true" />
+	</products>
+	<description><![CDATA[<p>Shporter - A Flash IDE timeline exporter
+<a href="https://github.com/oopstoons/shporter">https://github.com/oopstoons/shporter</a>
+By Pedro Chavez pedro@oopstoons.com
+========================================</p>
+
+<p>Shporter is a Flash extension that exports timeline animation into different formats.</p>
+
+<p>Do you have a 2D game with a lot of animated characters with many sequences and frames saved as massive sprites which is resulting in high memory usage and crap performance? Did you animate it in Flash puppet/modular style? Will you? If yes, then you are in luck my friend. Shporter will export your Flash timeline animations and keep all your modular data intact. Save tons of memory and file space!</p>
+
+Currently, Shporter only exports to the <a href="http://www.brashmonkey.com/spriter.htm">Spriter</a> format, but more formats are planned. Luckily there are many <a href="http://www.brashmonkey.com/forum/viewforum.php?f=3&sid=b22af28c5307fbceb04886436cc358f3">plugins</a> in development for the Spriter format:
+- Unity: NGUI & ex2D - <a href="http://www.brashmonkey.com/forum/viewtopic.php?f=3&t=534&sid=157d02f6f67897572c3692f3e0f60a4d">Spriter Data API</a>
+- Flash: Starling - <a href="http://www.sammyjoeosborne.com/SpriterMC/">SpriterMC</a>
+- Flash: Starling - <a href="http://treefortress.com/introducing-spriteras-play-spriter-animations-scml-with-starling/">SpriterAS</a> <a href="https://github.com/treefortress/SpriterAS">GitHub</a>
+- Corona: <a href="http://www.brashmonkey.com/forum/viewtopic.php?f=3&t=2838">Unnamed API</a> <a href="https://github.com/XibalbaStudios/Spriter">GitHub</a>
+- Cocos 2D: <a href="http://www.brashmonkey.com/forum/viewtopic.php?f=3&t=870">CCSpriterX</a>]]></description>
+	<ui-access><![CDATA[The command can be found in 'Commands > Shporter']]></ui-access>
+	<license-agreement><![CDATA[]]></license-agreement>
+	<files>
+		<file source="Commands/Spriter - all main elements.jsfl" destination="$flash/Commands/Shporter" />
+		<file source="Commands/Spriter - timeline selection.jsfl" destination="$flash/Commands/Shporter" />
+		<file source="Commands/Spriter - library selection.jsfl" destination="$flash/Commands/Shporter" />
+		<file source="Commands/PNG - timeline selection.jsfl" destination="$flash/Commands/Shporter" />
+		<file source="Commands/PNG - library selection.jsfl" destination="$flash/Commands/Shporter" />
+		<file source="Library/png_exporter.jsfl" destination="$flash/Shporter" />
+		<file source="Library/spriter_exporter.jsfl" destination="$flash/Shporter" />
+		<file source="Library/debug.jsfl" destination="$flash/Shporter" />
+		<file source="Library/math.jsfl" destination="$flash/Shporter" />
+		<file source="Library/trig.jsfl" destination="$flash/Shporter" />
+		<file source="Library/logger.jsfl" destination="$flash/Shporter" />
+	</files>
+</macromedia-extension>
