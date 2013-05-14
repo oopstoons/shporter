@@ -344,8 +344,7 @@ SpriterExporter.prototype = {
 		out += '	<folder id="0" name="' + this.projectName + '">\r\n';
 		for(var i = 0; i < this.imgNames.length; i++){
 			var img = this.imgData[this.imgNames[i]];
-			//var imgNode = '<file type="image" id="' + i + '" name="' + img.name + '.png" pivotx="' + img.regX + '" pivoty="' + img.regY + '"/>';
-			var imgNode = '<file id="' + i + '" name="' + img.name + '.png" width="' + img.width + '" height="' + img.height + '"/>';
+			var imgNode = '<file id="' + i + '" name="' + this.projectName + '/' + img.name + '.png" width="' + img.width + '" height="' + img.height + '" pivot_x="' + this.getImagePivotX(img) + '" pivot_y="' + this.getImagePivotY(img) + '"/>'
 			out += '		' + imgNode + '\r\n';
 		}
 		out += '	</folder>\r\n';
@@ -553,6 +552,15 @@ SpriterExporter.prototype = {
 		return this.imgData[imgName].index;
 	},
 
+	getImagePivotX: function(imageData){
+		var value = MathUtil.getPercent(0, imageData.width, imageData.regX, false);
+		return MathUtil.round(value, .001);
+	},
+	getImagePivotY: function(imageData){
+		var value = MathUtil.getPercent(imageData.height, 0, imageData.regY, false);
+		return MathUtil.round(value, .001);
+	},
+	
 	//-----------------------------------------------------------------------------------------------------------------------------
 	// VALIDATION METHODS
 
