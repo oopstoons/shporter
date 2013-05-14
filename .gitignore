@@ -6,7 +6,7 @@ obj/
 
 # Compiled Files
 *.zxp
-example/*.swf
+example/*
 
 # Other files and folders
 .settings/
@@ -14,11 +14,6 @@ example/*.swf
 version.as
 test.swf
 *.bat
-*.png
-example/*.scml
-RECOVER_*.fla
-__DELETE_*.fla
-baby.fla
 
 # Project files, i.e. `.project`, `.actionScriptProperties` and `.flexProperties`
 # should NOT be excluded as they contain compiler settings and other important
