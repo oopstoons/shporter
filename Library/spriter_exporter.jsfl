@@ -46,6 +46,12 @@ SpriterExporter.prototype = {
 	/** The origin document file name. */
 	docName:"",
 	
+	/** The output document. */
+	outputDoc:"",
+	
+	/** The output document path. */
+	outputDocPath:"",
+	
 	/** The name of the project. */
 	projectName:"",
 	
@@ -110,21 +116,74 @@ SpriterExporter.prototype = {
 			}
 		}
 		
+		this.saveOutput();
+	},
+	
+	/* Export the selected timeline elements. */
+	exportSelectedElements:function() {
+		this.saveOutputDoc();
+		
+		// iterate through all slected items and export valid items
+		var selection = this.outputDoc.selection.slice();
+		Logger.log("selection: total=" + selection.length);
+		for(var i = 0; i < selection.length; i++){		
+			var element = selection[i];
+			Logger.log("element: " + i + " " +element);
+			if (this.isValidAni(element)){
+				this.prepLayers(element);
+				this.readAniSymbol(element);
+			}
+		}
+		
+		this.saveOutput();
+		this.openOriginalDoc();
+	},
+	
+	/* Export the selected library items. */
+	exportSelectedItems:function() {
+		// copy library items to main timeline and give them names
+		this.doc.library.addItemToDocument({x:0, y:0});
+		var selection = this.doc.selection.slice();
+		for(var i = 0; i < selection.length; i++){		
+			var element = selection[i];			
+			try {
+				element.name = this.fixName(element.libraryItem.name);
+			} catch(err){}
+		}
+		
+		// export selected items
+		this.exportSelectedElements();
+	},
+
+	//-----------------------------------------------------------------------------------------------------------------------------
+	// PRIVATE EXPORT METHODS
+	
+	saveOutputDoc:function(){
+		// save doc before export
+		this.doc.save();
+	
+		// save doc temporarily
+		this.outputDocPath = this.docPath + "/__DELETE_THIS__.fla";
+		fl.saveDocument(fl.getDocumentDOM(), this.outputDocPath);
+		this.outputDoc = fl.getDocumentDOM();
+	},
+	
+	openOriginalDoc:function(){
+		// close and delete the output doc
+		this.outputDoc.close(false);
+		FLfile.remove(this.outputDocPath);
+		
+		// open the original doc
+		fl.openDocument(this.docPath + this.docName + ".fla");
+	},
+	
+	saveOutput:function(){		
 		// output the xml
 		var out = this.saveData();
-		//Logger.log("\r\r\r" + out);
 		
 		// save the file
 		var filePath = this.docPath + this.projectName + ".scml";
 		FLfile.write(filePath, out);
-	},
-	
-	exportSelectedElements:function() {
-		// TODO export selected animations: current timeline selection
-	},
-	
-	exportSelectedItems:function() {
-		// TODO export selected animations: library selection
 	},
 
 	//-----------------------------------------------------------------------------------------------------------------------------
@@ -329,7 +388,7 @@ SpriterExporter.prototype = {
 
 	//-----------------------------------------------------------------------------------------------------------------------------
 	// SAVE METHODS
-
+	
 	/**
 	 * Save the animation data.
 	 */

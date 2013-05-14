@@ -210,7 +210,7 @@ PNGExporter.prototype = {
 		this.saveStage(fileName);
 		
 		// open the inputal doc
-		fl.openDocument(this.inputPath + this.inputName + ".fla")
+		fl.openDocument(this.inputPath + this.inputName + ".fla");
 	},
 
 	//-----------------------------------------------------------------------------------------------------------------------------

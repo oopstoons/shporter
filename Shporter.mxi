@@ -23,6 +23,8 @@ Currently, Shporter only exports to the <a href="http://www.brashmonkey.com/spri
 	<license-agreement><![CDATA[]]></license-agreement>
 	<files>
 		<file source="Commands/Spriter - all main elements.jsfl" destination="$flash/Commands/Shporter" />
+		<file source="Commands/Spriter - timeline selection.jsfl" destination="$flash/Commands/Shporter" />
+		<file source="Commands/Spriter - library selection.jsfl" destination="$flash/Commands/Shporter" />
 		<file source="Commands/PNG - timeline selection.jsfl" destination="$flash/Commands/Shporter" />
 		<file source="Commands/PNG - library selection.jsfl" destination="$flash/Commands/Shporter" />
 		<file source="Library/png_exporter.jsfl" destination="$flash/Shporter" />

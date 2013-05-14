@@ -4,7 +4,7 @@ fl.runScript(fl.configURI + "Shporter/logger.jsfl");
 init();
 
 function init(){
-	Logger.log(">>> Export library items to PNGs: ");
+	Logger.log(">>> Export selected library items to PNGs: ");
 	
 	var exporter = new PNGExporter();
 	

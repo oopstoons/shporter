@@ -4,7 +4,7 @@ fl.runScript(fl.configURI + "Shporter/logger.jsfl");
 init();
 
 function init(){
-	Logger.log(">>> Export timline elements to PNGs: ");
+	Logger.log(">>> Export selected timeline elements to PNGs: ");
 	
 	var exporter = new PNGExporter();
 	
