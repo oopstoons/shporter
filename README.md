@@ -27,7 +27,7 @@ Luckily there are many [plugins](http://www.brashmonkey.com/forum/viewforum.php?
   - [EasyMotion2D](https://www.assetstore.unity3d.com/#/content/2138)
 - Research Javascript export
 - Research Corona export
-- Research export to [Spline](http://esotericsoftware.com/) format
+- Research export to [Spine](http://esotericsoftware.com/) format
 
 ## Releases:
 
