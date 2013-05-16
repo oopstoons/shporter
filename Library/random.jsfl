@@ -2,6 +2,7 @@
  * RandomUtil contains random functions (cool).
  * @author Pedro Chavez
  * @email pedro@oopstoons.com
+ * @see https://github.com/oopstoons/shporter
  */
 var RandomUtil = {
 

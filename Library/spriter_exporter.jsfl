@@ -2,6 +2,7 @@
  * SpriterExporter allows you to export a timeline animation and images to the Spriter format (with some restrictions).
  * @author Pedro Chavez
  * @email pedro@oopstoons.com
+ * @see https://github.com/oopstoons/shporter
  * @see http://www.brashmonkey.com/spriter.htm
  */
 fl.runScript(fl.configURI + "Shporter/timeline_reader.jsfl");

@@ -2,6 +2,7 @@
  * PNGExporter allows you to export a library item, timeline element or the main stage as a PNG.
  * @author Pedro Chavez
  * @email pedro@oopstoons.com
+ * @see https://github.com/oopstoons/shporter
  * @see http://abitofcode.com/2011/11/export-flash-library-items-as-pngs-with-jsfl/
  *
  * May have to load in: fl.configURI + 'Javascript/ObjectFindAndSelect.jsfl'.

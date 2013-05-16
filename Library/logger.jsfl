@@ -2,6 +2,7 @@
  * Logger is used for logging. It's particularly useful when switching between documents as the output panel may get cleared.
  * @author Pedro Chavez
  * @email pedro@oopstoons.com
+ * @see https://github.com/oopstoons/shporter
  */
 var Logger = {
 

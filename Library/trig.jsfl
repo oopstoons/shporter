@@ -2,6 +2,7 @@
  * TrigUtil contains trigonometry functions (dope).
  * @author Pedro Chavez
  * @email pedro@oopstoons.com
+ * @see https://github.com/oopstoons/shporter
  */
 var TrigUtil = {
 
