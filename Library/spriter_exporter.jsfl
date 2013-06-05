@@ -175,7 +175,7 @@ SpriterExporter.prototype = {
 		Logger.log('=== SAVE DATA');
 		
 		var out = '<?xml version="1.0" encoding="UTF-8"?>\r\n';
-		out += '<spriter_data scml_version="1.0" generator="Shporter" generator_version="b2">\r\n';
+		out += '<spriter_data scml_version="1.0" generator="Shporter" generator_version="1.0.1">\r\n';
 		
 		// output the image xml
 		out += '	<folder id="0" name="' + this.projectName + '">\r\n';
@@ -213,36 +213,33 @@ SpriterExporter.prototype = {
 			}
 			
 			// save the main timeline
-			var mainlineOut = "";
+			mainlineOut = "";
 			mainlineOut += '			<mainline>\r\n';
-			var keyframeCount = 0;
-			for(var t = 0; t < ani.time; t++){
-				var foundKeyFrame = false;
-				var itemCount = 0;
+			for(var keyIndex = 0; keyIndex < ani.keyFrames.length; keyIndex++){
+				Logger.log(">> Keyframe: " + keyIndex + " " + keyFrame);
+				var keyFrame = ani.keyFrames[keyIndex];
 				
+				mainlineOut += '				<key id="' + keyIndex + '" time="' + this.getTime(keyFrame) + '">\r\n';
+				
+				var itemCount = 0;
 				for(var layerNum = 0; layerNum < ani.layerData.length; layerNum++){
 					var layerData = ani.layerData[layerNum];
-					for(var f = 0; f < layerData.length; f++){
-						var frame = layerData[f];
-						if (frame.frame == t){
-							
-							if (!foundKeyFrame){
-								foundKeyFrame = true;
-								mainlineOut += '				<key id="' + keyframeCount + '" time="' + this.getTime(t) + '">\r\n';
-							}
-						
-							mainlineOut += this.saveMainlineKey(frame, keyframeCount, itemCount);
-							itemCount++;
+					for(var frameIndex = 0; frameIndex < layerData.length; frameIndex++){
+						var frame = layerData[frameIndex];
+						if (frame.frame == keyFrame){
+							break;
+						} else if (frame.frame > keyFrame){
+							frame = layerData[frameIndex - 1];
+							break;
 						}
-					}
-				}
+					}					
+					
+					mainlineOut += this.saveMainlineKey(frame, keyframeCount, itemCount);
+					itemCount++;
+				}				
 				
-				if (foundKeyFrame){
-					mainlineOut += '				</key>\r\n';
-					keyframeCount++;
-				}
-			}
-			
+				mainlineOut += '				</key>\r\n';				
+			}			
 			mainlineOut += '			</mainline>\r\n';
 			
 			out += mainlineOut;

@@ -106,6 +106,7 @@ TimelineReader.prototype = {
 		data.scaleY = aniInstance.scaleY;
 		data.layerData = [];
 		data.layerMeta = [];
+		data.keyFrames = [];
 		
 		// don't read if same named animation exists
 		if (!this.isNewAni(data.name)){
@@ -119,8 +120,37 @@ TimelineReader.prototype = {
 		// read all layers in the timeline
 		for(var layerNum = 0; layerNum < data.item.timeline.layerCount; layerNum++) {
 			
+			// get the layer
+			var layer = aniInstance.libraryItem.timeline.layers[layerNum];
+			aniInstance.libraryItem.timeline.setSelectedLayers(layerNum);
+			
+			// continue if valid layer
+			var frameData = [];
+			if (this.isValidAniLayer(layer)){
+				Logger.log("--- READLAYER " + layer.name);
+				
+				// read all frames in the layer
+				for(var frameNum = 0; frameNum < layer.frameCount; frameNum++){
+				
+					// check if it's a keyframe
+					var isKeyFrame = this.isKeyFrame(layer, frameNum);
+					if (isKeyFrame){
+						// keep track of keyframes
+						if (data.keyFrames.indexOf(frameNum) == -1){
+							data.keyFrames.push(frameNum);
+							data.keyFrames.sort(function(a,b){return a-b});
+						}
+					
+						// read the frame data
+						var elementData = this.readFrame(aniInstance, layer, frameNum);
+						if (elementData){
+							frameData.push(elementData);
+						}
+					}
+				}
+			}
+			
 			// add to layer data only if data exists
-			var frameData = this.readLayer(aniInstance, layerNum);
 			if (frameData.length) {
 				data.layerData.unshift(frameData);
 				
@@ -139,34 +169,10 @@ TimelineReader.prototype = {
 		this.aniData[data.name] = data;
 		this.aniNames.push(data.name);
 		
+		Debug.dumpMaxLevels = 5;
+		Logger.log(Debug.dump(data, data.name));
+		
 		return data;
-	},
-	
-	/**
-	 * Read a layer from a timeline.
-	 */
-	readLayer:function(aniInstance, layerNum){
-		// get the layer
-		var layer = aniInstance.libraryItem.timeline.layers[layerNum];
-		aniInstance.libraryItem.timeline.setSelectedLayers(layerNum);
-		
-		// continue if valid layer
-		var frameData = [];
-		if (this.isValidAniLayer(layer)){
-			layer.locked = false;
-			Logger.log("--- READLAYER " + layer.name);
-			
-			// read all frames in the layer
-			for(var frameNum = 0; frameNum < layer.frameCount; frameNum++){
-				var elementData = this.readFrame(aniInstance, layer, frameNum);
-				if (elementData){
-					frameData.push(elementData);
-				}
-			}
-		}
-		
-		// return the data
-		return frameData;
 	},
 	
 	/**
@@ -253,7 +259,7 @@ TimelineReader.prototype = {
 		this.elementData.push(elementData);
 		return elementData;
 	},
-
+	
 	//-----------------------------------------------------------------------------------------------------------------------------
 	// SAVE METHODS
 	
@@ -327,6 +333,11 @@ TimelineReader.prototype = {
 
 	isValidAniElement: function(element){
 		return (element.elementType == 'instance' && element.instanceType == 'symbol' && element.symbolType != 'button');
+	},
+	
+	isKeyFrame:function(layer, frameNum){
+		var frame = layer.frames[frameNum];
+		return frame.startFrame == frameNum ? true : false;
 	},
 
 	isNewAni: function(aniName){
