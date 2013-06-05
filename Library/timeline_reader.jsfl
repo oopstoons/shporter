@@ -125,6 +125,7 @@ TimelineReader.prototype = {
 			aniInstance.libraryItem.timeline.setSelectedLayers(layerNum);
 			
 			// continue if valid layer
+			var nonEmptyFrames = 0;
 			var frameData = [];
 			if (this.isValidAniLayer(layer)){
 				Logger.log("--- READLAYER " + layer.name);
@@ -146,12 +147,15 @@ TimelineReader.prototype = {
 						if (elementData){
 							frameData.push(elementData);
 						}
+						
+						// count used frames
+						nonEmptyFrames = elementData.isEmpty ? nonEmptyFrames : nonEmptyFrames + 1;
 					}
 				}
 			}
 			
 			// add to layer data only if data exists
-			if (frameData.length) {
+			if (nonEmptyFrames > 0) {
 				data.layerData.unshift(frameData);
 				
 				// save layer meta
