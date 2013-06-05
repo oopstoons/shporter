@@ -175,7 +175,7 @@ SpriterExporter.prototype = {
 		Logger.log('=== SAVE DATA');
 		
 		var out = '<?xml version="1.0" encoding="UTF-8"?>\r\n';
-		out += '<spriter_data scml_version="1.0" generator="Shporter" generator_version="1.0.1">\r\n';
+		out += '<spriter_data scml_version="1.0" generator="Shporter" generator_version="1.0.2">\r\n';
 		
 		// output the image xml
 		out += '	<folder id="0" name="' + this.projectName + '">\r\n';
@@ -225,17 +225,19 @@ SpriterExporter.prototype = {
 				for(var layerNum = 0; layerNum < ani.layerData.length; layerNum++){
 					var layerData = ani.layerData[layerNum];
 					for(var frameIndex = 0; frameIndex < layerData.length; frameIndex++){
-						var frame = layerData[frameIndex];
-						if (frame.frame == keyFrame){
+						var elementData = layerData[frameIndex];
+						if (elementData.frame == keyFrame){
 							break;
-						} else if (frame.frame > keyFrame){
-							frame = layerData[frameIndex - 1];
+						} else if (elementData.frame > keyFrame){
+							elementData = layerData[frameIndex - 1];
 							break;
 						}
 					}					
 					
-					mainlineOut += this.saveMainlineKey(frame, keyframeCount, itemCount);
-					itemCount++;
+					if (elementData.isEmpty == false){
+						mainlineOut += this.saveMainlineKey(elementData, keyIndex, itemCount);
+						itemCount++;
+					}
 				}				
 				
 				mainlineOut += '				</key>\r\n';				
@@ -255,10 +257,10 @@ SpriterExporter.prototype = {
 	/**
 	 * Save a mainline object.
 	 */
-	saveMainlineKey: function(sprite, keyframeCount, itemCount){
+	saveMainlineKey: function(elementData, keyframeCount, itemCount){
 		var node = '<object_ref id="' + itemCount + '"';
-		node += ' timeline="' + sprite.timelineID + '"';
-		node += ' key="' + sprite.keyID + '"';
+		node += ' timeline="' + elementData.timelineID + '"';
+		node += ' key="' + elementData.keyID + '"';
 		node += ' z_index="' + itemCount + '"';
 		node += '/>';
 		return '					' + node + '\r\n';
@@ -268,6 +270,10 @@ SpriterExporter.prototype = {
 	 * Save a timeline key.
 	 */
 	saveTimelineKey: function(elementData, frameCount, layerCount){
+		if (elementData.isEmpty){
+			return '';
+		}
+	
 		elementData.timelineID = layerCount;
 		elementData.keyID = frameCount;
 		

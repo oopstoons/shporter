@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<macromedia-extension name="Shporter" version="1.0.1" type="command">
+<macromedia-extension name="Shporter" version="1.0.2" type="command">
 	<author name="Pedro Chavez" />
 	<products>
 		<product name="Flash" version="11" primary="true" required="true" />

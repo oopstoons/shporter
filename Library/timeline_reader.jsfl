@@ -193,17 +193,25 @@ TimelineReader.prototype = {
 		// continue if valid frame
 		var elementData = null;
 		if (this.isValidAniFrame(frame, frameNum)){
-			Logger.log("-- frame:" + frameNum+ ", " + frame.startFrame + ", " + tempKeyframe + " " + frame.tweenType + ", " + frame.elements[0].x + " " + frame.elements);
+			Logger.log("-- frame:" + frameNum+ ", " + frame.startFrame + ", " + tempKeyframe + " " + frame.tweenType + ", " + frame.elements);
 			
 			// read the first valid element in the frame
 			for(var elementNum = 0; elementNum < frame.elements.length; elementNum++){
 				var element = frame.elements[elementNum];
-				if (this.isValidAniElement(element) && elementNum == 0){
+				if (this.isValidAniElement(element)){
 					
 					// add element data to timeline data
 					elementData = this.readElement(element, elementNum, frameNum);
+					break;
 				}
 			}
+		}
+		
+		// return empty data for blank or invalid elements
+		if (elementData == null){
+			elementData = {};
+			elementData.frame = frameNum;
+			elementData.isEmpty = true;
 		}
 		
 		// clear a temporary keyframe
@@ -222,6 +230,7 @@ TimelineReader.prototype = {
 		Logger.log("--- readElement:" + depth + " " + frameNum);
 		// TODO save shape data
 		var elementData = {};
+		elementData.isEmpty = false;
 		//elementData.element = element;
 		elementData.frame = frameNum;
 		elementData.libraryItem = element.libraryItem;
