@@ -2,6 +2,7 @@
  * Debug contains debugging utils for Flash.
  * @author Pedro Chavez
  * @email pedro@oopstoons.com
+ * @see https://github.com/oopstoons/shporter
  */
 var Debug = {
 

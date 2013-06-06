@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<macromedia-extension name="Shporter" version="1.0.0" type="command">
+<macromedia-extension name="Shporter" version="1.1.0" type="command">
 	<author name="Pedro Chavez" />
 	<products>
 		<product name="Flash" version="11" primary="true" required="true" />
@@ -27,8 +27,9 @@ Currently, Shporter only exports to the <a href="http://www.brashmonkey.com/spri
 		<file source="Commands/Spriter - library selection.jsfl" destination="$flash/Commands/Shporter" />
 		<file source="Commands/PNG - timeline selection.jsfl" destination="$flash/Commands/Shporter" />
 		<file source="Commands/PNG - library selection.jsfl" destination="$flash/Commands/Shporter" />
-		<file source="Library/png_exporter.jsfl" destination="$flash/Shporter" />
+		<file source="Library/timeline_reader.jsfl" destination="$flash/Shporter" />
 		<file source="Library/spriter_exporter.jsfl" destination="$flash/Shporter" />
+		<file source="Library/png_exporter.jsfl" destination="$flash/Shporter" />
 		<file source="Library/debug.jsfl" destination="$flash/Shporter" />
 		<file source="Library/math.jsfl" destination="$flash/Shporter" />
 		<file source="Library/trig.jsfl" destination="$flash/Shporter" />
