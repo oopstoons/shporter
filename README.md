@@ -3,6 +3,10 @@ Shporter - A Flash IDE timeline exporter
 
 Shporter is a Flash extension that exports timeline animation into different formats.
 
+[Download Latest](http://oopstoons.com/tools/Shporter.zxp)
+
+[Project Page](http://oopstoons.com/projects/shporter/)
+
 Do you have a 2D game with a lot of animated characters with many sequences and frames saved as massive sprites which is resulting in high memory usage and crap performance?
 Did you animate it in Flash puppet/modular style? Will you? If yes, then you are in luck my friend. 
 Shporter will export your Flash timeline animations and keep all your modular data intact. 
@@ -23,11 +27,11 @@ Luckily there are many [plugins](http://www.brashmonkey.com/forum/viewforum.php?
   - [EasyMotion2D](https://www.assetstore.unity3d.com/#/content/2138)
 - Research Javascript export
 - Research Corona export
-- Research export to [Spline](http://esotericsoftware.com/) format
+- Research export to [Spine](http://esotericsoftware.com/) format
 
 ## Releases:
 
-### Version 1.0.0 : May 13, 2013
+### [Version 1.0.0](http://oopstoons.com/shporter-a-flash-timeline-exporter/) : May 13, 2013
 - Initial release
 - Exports to [Spriter SCML](http://www.brashmonkey.com/spriter.htm) format version B2
 - Exports timeline elements or library items as pngs
