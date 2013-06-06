@@ -175,7 +175,7 @@ SpriterExporter.prototype = {
 		Logger.log('=== SAVE DATA');
 		
 		var out = '<?xml version="1.0" encoding="UTF-8"?>\r\n';
-		out += '<spriter_data scml_version="1.0" generator="Shporter" generator_version="1.0.2">\r\n';
+		out += '<spriter_data scml_version="1.0" generator="Shporter" generator_version="1.1.0">\r\n';
 		
 		// output the image xml
 		out += '	<folder id="0" name="' + this.projectName + '">\r\n';

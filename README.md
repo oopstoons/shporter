@@ -31,6 +31,10 @@ Luckily there are many [plugins](http://www.brashmonkey.com/forum/viewforum.php?
 
 ## Releases:
 
+### [Version 1.1.0](http://oopstoons.com/shporter-1-1-0/) : June 6, 2013
+-  Optimized frame export for Spriter: Exports only keyframes now which result in smaller files and closer to original fla timeline
+- Blank keyframes export and don't fail
+
 ### [Version 1.0.0](http://oopstoons.com/shporter-a-flash-timeline-exporter/) : May 13, 2013
 - Initial release
 - Exports to [Spriter SCML](http://www.brashmonkey.com/spriter.htm) format version B2
